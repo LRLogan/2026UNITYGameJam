@@ -18,11 +18,5 @@
 
   "model": "ollama/qwen3-coder",
 
-  "mcp": {
-    "unity": {
-      "type": "remote",
-      "url": "http://localhost:8080/mcp",
-      "enabled": true
-    }
-  }
+  "mcp": {}
 }
