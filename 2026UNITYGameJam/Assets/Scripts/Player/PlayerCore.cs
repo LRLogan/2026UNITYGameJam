@@ -3,6 +3,13 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+public enum MovementState
+{
+    Ground,
+    Slope,
+    Air
+}
+
 public class PlayerCore : MonoBehaviour
 {
     [Header("Camera and look")]
@@ -28,10 +35,10 @@ public class PlayerCore : MonoBehaviour
     private Rigidbody rb;
     private Vector3 moveDir;
     private float xRot;
-    private float curSpeed;
-    private bool canJump;
     private bool jumpHeld;
     private bool isSprinting;
+    private MovementState movementState = MovementState.Air;
+    private bool jumpAscending;
 
 
     [Header("Ground detection")]
@@ -39,9 +46,7 @@ public class PlayerCore : MonoBehaviour
     [SerializeField] private float groundCheckDistance = 1.5f;
     [SerializeField] private float maxSlopeAngle = 50f;
     [SerializeField] private float groundProbeRadius = 0.3f;
-    private bool isGrounded;
     private Vector3 groundNormal = Vector3.up;
-    private float groundAngle;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -57,47 +62,46 @@ public class PlayerCore : MonoBehaviour
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    private void FixedUpdate()
     {
-        CheckGround();
+        Vector3 velocity = rb.linearVelocity;
+        movementState = CheckGround(velocity.y);
 
-        // Can jump check
-        if (jumpHeld && isGrounded && canJump) Jump();
-
-        #region Main movement and directional updates
-        // Get movement direction relative to the player
-        Vector3 desiredDir =
-        transform.forward * moveDir.z +
-        transform.right * moveDir.x;
-
-        if (desiredDir.sqrMagnitude > 1f)
+        bool canJump = jumpHeld && movementState != MovementState.Air;
+        if (canJump)
         {
-            desiredDir.Normalize();
+            velocity.y = 0f;
+            movementState = MovementState.Air;
         }
 
-        // Separate horizontal and vertical velocity
-        Vector3 velocity = rb.linearVelocity;
-        Vector3 horizontalVelocity = new Vector3(
-            velocity.x,
-            0f,
-            velocity.z
-        );
+        // Get the desired direction
+        Vector3 desiredDir =
+            transform.forward * moveDir.z +
+            transform.right * moveDir.x;
 
-        // Store current horizontal movement speed
-        curSpeed = horizontalVelocity.magnitude;
+        if (desiredDir.sqrMagnitude > 1f) desiredDir.Normalize();
 
-        // Apply movement
-        if (isGrounded) GroundMove(ref horizontalVelocity, desiredDir);
-        else AirMove(ref horizontalVelocity, desiredDir);
+        // Check movement state and apply movement accordingly
+        if (movementState == MovementState.Slope)
+        {
+            SlopeMove(ref velocity, desiredDir);
+        }
+        else
+        {
+            Vector3 horizontalVelocity = new Vector3(velocity.x, 0f, velocity.z);
 
-        // Recombine horizontal and vertical velocity
-        rb.linearVelocity = new Vector3(
-            horizontalVelocity.x,
-            velocity.y,
-            horizontalVelocity.z
-        );
+            if (movementState == MovementState.Ground)
+                GroundMove(ref horizontalVelocity, desiredDir);
+            else
+                AirMove(ref horizontalVelocity, desiredDir);
 
-        #endregion
+            velocity.x = horizontalVelocity.x;
+            velocity.z = horizontalVelocity.z;
+        }
+
+        rb.linearVelocity = velocity;
+
+        if (canJump) Jump();
     }
 
     /// <summary>
@@ -192,6 +196,33 @@ public class PlayerCore : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Similar to Ground move but taylored for slopes
+    /// </summary>
+    /// <param name="velocity"></param>
+    /// <param name="desiredDir"></param>
+    private void SlopeMove(ref Vector3 velocity, Vector3 desiredDir)
+    {
+        velocity = Vector3.ProjectOnPlane(velocity, groundNormal);
+
+        // Apply friction onno movement input
+        if (desiredDir.sqrMagnitude < 0.001f)
+        {
+            ApplyGroundFriction(ref velocity);
+            return;
+        }
+
+        Vector3 slopeDirection = Vector3.ProjectOnPlane(desiredDir, groundNormal).normalized;
+        float targetSpeed = isSprinting ? maxGroundSprintSpeed : maxGroundWalkSpeed;
+        float acceleration = isSprinting ? groundSprintAcc : groundWalkAcc;
+
+        velocity = Vector3.MoveTowards(
+            velocity,
+            slopeDirection * targetSpeed,
+            acceleration * Time.fixedDeltaTime
+        );
+    }
+
     private void ApplyGroundFriction(ref Vector3 velocity)
     {
         velocity = Vector3.MoveTowards(
@@ -204,15 +235,18 @@ public class PlayerCore : MonoBehaviour
     /// <summary>
     /// Spherecast based ground detection
     /// </summary>
-    private void CheckGround()
+    /// <param name="verticalSpeed"></param>
+    /// <returns></returns>
+    private MovementState CheckGround(float verticalSpeed)
     {
-        Vector3 origin = transform.position;
+        // The sphere cast can still reach the floor just after takeoff.
+        if (jumpAscending && verticalSpeed > 0f)
+            return MovementState.Air;
 
-        // Debug line for distance check if needed
-        //Debug.DrawLine(origin, new Vector3(origin.x, origin.y - groundCheckDistance, origin.z), Color.magenta);
+        jumpAscending = false;
 
-        if (Physics.SphereCast(
-            origin,
+        if (!Physics.SphereCast(
+            transform.position,
             groundProbeRadius,
             Vector3.down,
             out RaycastHit hit,
@@ -220,29 +254,27 @@ public class PlayerCore : MonoBehaviour
             groundLayer,
             QueryTriggerInteraction.Ignore))
         {
-            groundNormal = hit.normal;
-
-            groundAngle = Vector3.Angle(
-                groundNormal,
-                Vector3.up
-            );
-
-            isGrounded = groundAngle <= maxSlopeAngle;
-
-            if (isGrounded) canJump = true;
+            return MovementState.Air;
         }
-        else
+
+        float angle = Vector3.Angle(hit.normal, Vector3.up);
+
+        if (angle > maxSlopeAngle)
+            return MovementState.Air;
+
+        if (angle <= 0.5f)
         {
             groundNormal = Vector3.up;
-            groundAngle = 0f;
-            isGrounded = false;
+            return MovementState.Ground;
         }
+
+        groundNormal = hit.normal;
+        return MovementState.Slope;
     }
 
     private void Jump()
     {
-        canJump = false;
-        isGrounded = false;
+        jumpAscending = true;
 
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }

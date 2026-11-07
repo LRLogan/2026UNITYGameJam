@@ -881,12 +881,12 @@ MonoBehaviour:
   sensY: 0.15
   cameraHolder: {fileID: 697977001}
   orientation: {fileID: 1898513454}
-  groundWalkAcc: 25
+  groundWalkAcc: 35
   groundSprintAcc: 30
   maxGroundWalkSpeed: 8
   maxGroundSprintSpeed: 15
   groundFriction: 5
-  jumpForce: 0.75
+  jumpForce: 5
   maxAirSpeed: 10
   airAcc: 3
   airControl: 5
