@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using static Unity.Collections.Unicode;
+using DG.Tweening;
 
 public enum MovementState
 {
@@ -16,15 +17,11 @@ public class PlayerCore : MonoBehaviour
     [SerializeField] private float sensX;
     [SerializeField] private float sensY;
     [SerializeField] private Transform cameraHolder;
-    [SerializeField, Min(0f)] private float wallRunFovBoost = 10f;
+    [SerializeField, Min(0f)] private float wallRunFovChange = 5f;
     [SerializeField, Min(0f)] private float wallRunTilt = 5f;
-    private Camera playerCamera;
+    [SerializeField] private Camera playerCamera;
     private float fovBeforeWallRun;
     private float cameraRoll;
-
-
-    [Tooltip("Keeps track of current orientation")]
-    [SerializeField] private Transform orientation;
 
 
     [Header("Bace Movement")]
@@ -99,8 +96,7 @@ public class PlayerCore : MonoBehaviour
 
         rb = GetComponent<Rigidbody>();
         playerCollider = GetComponent<Collider>();
-        if (cameraHolder != null)
-            playerCamera = cameraHolder.GetComponentInChildren<Camera>();
+        fovBeforeWallRun = playerCamera.fieldOfView;
 
         // Prevent the player from tipping over
         rb.freezeRotation = true;
@@ -341,6 +337,11 @@ public class PlayerCore : MonoBehaviour
 
         gravityBeforeWallRun = rb.useGravity;
         rb.useGravity = gravityBeforeWallRun && wallRunGravityScale > 0f;
+
+        // camera effects
+        DoFov(fovBeforeWallRun + wallRunFovChange);
+        if (direction < 0f) DoTilt(wallRunTilt);
+        if (direction > 0f) DoTilt(-wallRunTilt);
     }
 
     private void WallRunMove(ref Vector3 velocity)
@@ -395,7 +396,12 @@ public class PlayerCore : MonoBehaviour
 
     private void StopWallRun()
     {
+        // reset gravity feild
         rb.useGravity = gravityBeforeWallRun;
+
+        // reset cam effects
+        DoFov(fovBeforeWallRun);
+        DoTilt(0);
     }
 
     /// <summary>
@@ -560,6 +566,7 @@ public class PlayerCore : MonoBehaviour
         return MovementState.Slope;
     }
 
+    #region Wall handeling
     /// <summary>
     /// Predictive wall detection to allow smooth entry from all desired angles
     /// </summary>
@@ -679,6 +686,7 @@ public class PlayerCore : MonoBehaviour
     {
         return new Vector3(hit.normal.x, 0f, hit.normal.z).normalized;
     }
+    #endregion
 
     /// <summary>
     /// Simple helper to check for appropriate height to start wallrunning
@@ -715,8 +723,8 @@ public class PlayerCore : MonoBehaviour
 
     private void ApplyCameraRotation()
     {
-        if (cameraHolder != null)
-            cameraHolder.localRotation = Quaternion.Euler(xRot, 0f, cameraRoll);
+        if (playerCamera.transform != null)
+            playerCamera.transform.localRotation = Quaternion.Euler(xRot, 0f, cameraRoll);
     }
 
     public void OnMove(InputAction.CallbackContext ctx)
@@ -759,6 +767,19 @@ public class PlayerCore : MonoBehaviour
     {
         if (ctx.started) downwardsRunning = true;
         if (ctx.canceled) downwardsRunning = false;
+    }
+
+    #endregion
+
+    #region Cam effects
+    public void DoFov(float endVal)
+    {
+        playerCamera.DOFieldOfView(endVal, 0.25f);
+    }
+
+    public void DoTilt(float zTilt)
+    {
+        cameraHolder.DOLocalRotate(new Vector3(0, 0, zTilt), 0.25f);
     }
 
     #endregion
