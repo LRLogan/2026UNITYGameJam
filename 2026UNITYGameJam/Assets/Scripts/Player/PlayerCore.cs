@@ -59,6 +59,10 @@ public class PlayerCore : MonoBehaviour
     private bool wallLeft;
     private bool wallRight;
 
+    [Header("Wallrunning jumping")]
+    [SerializeField] private float wallJumpUpForce;
+    [SerializeField] private float wallJumpSideForce;
+
 
     [Header("Ground detection")]
     [SerializeField] private LayerMask groundLayer;
@@ -87,10 +91,15 @@ public class PlayerCore : MonoBehaviour
 
         bool canJump = jumpHeld &&
             (nextState == MovementState.Ground || nextState == MovementState.Slope);
+        bool canWallJump = jumpHeld && nextState == MovementState.Wallrunning;
 
         if (canJump)
         {
             velocity.y = 0f;
+            nextState = MovementState.Air;
+        }
+        if (canWallJump)
+        {
             nextState = MovementState.Air;
         }
 
@@ -107,6 +116,7 @@ public class PlayerCore : MonoBehaviour
         rb.linearVelocity = velocity;
 
         if (canJump) Jump();
+        if(canWallJump) WallJump();
     }
 
     private void OnDisable()
@@ -191,6 +201,15 @@ public class PlayerCore : MonoBehaviour
         jumpAscending = true;
 
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+    }
+
+    private void WallJump()
+    {
+        Vector3 wallNormal = runningOnRightWall ? rightWallHit.normal : leftWallHit.normal;
+        Vector3 force = transform.up * wallJumpUpForce + wallNormal * wallJumpSideForce;
+
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        rb.AddForce(force, ForceMode.Impulse); 
     }
 
     private void StartWallrun()

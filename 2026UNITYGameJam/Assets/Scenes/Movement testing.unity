@@ -993,11 +993,11 @@ MonoBehaviour:
   sensY: 0.15
   cameraHolder: {fileID: 697977001}
   orientation: {fileID: 1898513454}
-  groundWalkAcc: 45
+  groundWalkAcc: 55
   groundSprintAcc: 30
   maxGroundWalkSpeed: 9
   maxGroundSprintSpeed: 15
-  groundFriction: 5
+  groundFriction: 7
   jumpForce: 5.5
   maxAirSpeed: 10
   airAcc: 3
@@ -1008,8 +1008,10 @@ MonoBehaviour:
   wallRunForce: 5
   maxWallRunTime: 1.5
   wallClimbSpeed: 2.5
-  wallCheckDist: 0.7
+  wallCheckDist: 1
   minJumpHeight: 1.5
+  wallJumpUpForce: 5
+  wallJumpSideForce: 5
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
