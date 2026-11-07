@@ -43,9 +43,12 @@ public class PlayerCore : MonoBehaviour
     [SerializeField] LayerMask wallLayer;
     [SerializeField] private float wallRunForce;
     [SerializeField] private float maxWallRunTime;
+    [SerializeField] private float wallClimbSpeed = 5f;
     private float wallRunTimer;
     private bool runningOnRightWall;
     private bool gravityBeforeWallRun;
+    private bool upwardsRunning;
+    private bool downwardsRunning;
 
 
     [Header("Wall running detection")]
@@ -208,6 +211,12 @@ public class PlayerCore : MonoBehaviour
             wallForward = -wallForward;
 
         velocity = Vector3.Dot(velocity, wallForward) * wallForward;
+
+        // vertical force
+        if (upwardsRunning) velocity.y = wallClimbSpeed;
+        if (downwardsRunning) velocity.y = -wallClimbSpeed;
+
+        // forwards force
         rb.AddForce(wallForward * wallRunForce, ForceMode.Force);
         wallRunTimer -= Time.fixedDeltaTime;
     }
@@ -450,6 +459,19 @@ public class PlayerCore : MonoBehaviour
         // Offloads checks to FixedUpdate to account for holding the jump
         if (ctx.performed) jumpHeld = true;
         if (ctx.canceled) jumpHeld = false;
+    }
+
+    // WallRunUp and down pass values into wallrunning movement method for checks
+    public void OnWallRunUp(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started) upwardsRunning = true;
+        if (ctx.canceled) upwardsRunning = false;
+    }
+
+    public void OnWallRunDown(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started) downwardsRunning = true;
+        if (ctx.canceled) downwardsRunning = false;
     }
 
     #endregion

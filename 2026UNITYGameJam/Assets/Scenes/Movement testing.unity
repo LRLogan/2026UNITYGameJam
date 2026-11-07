@@ -227,7 +227,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0, y: 0, z: 0}
-  m_LocalScale: {x: 10, y: 1, z: 10}
+  m_LocalScale: {x: 15, y: 1, z: 15}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -993,12 +993,12 @@ MonoBehaviour:
   sensY: 0.15
   cameraHolder: {fileID: 697977001}
   orientation: {fileID: 1898513454}
-  groundWalkAcc: 35
+  groundWalkAcc: 45
   groundSprintAcc: 30
-  maxGroundWalkSpeed: 8
+  maxGroundWalkSpeed: 9
   maxGroundSprintSpeed: 15
   groundFriction: 5
-  jumpForce: 5
+  jumpForce: 5.5
   maxAirSpeed: 10
   airAcc: 3
   airControl: 5
@@ -1007,8 +1007,9 @@ MonoBehaviour:
     m_Bits: 128
   wallRunForce: 5
   maxWallRunTime: 1.5
+  wallClimbSpeed: 2.5
   wallCheckDist: 0.7
-  minJumpHeight: 2
+  minJumpHeight: 1.5
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -1164,6 +1165,38 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 9caa3d8a-6b2f-4e8e-8bad-6ede561bd9be
     m_ActionName: UI/TrackedDeviceOrientation
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1086010138}
+        m_TargetAssemblyTypeName: PlayerCore, Assembly-CSharp
+        m_MethodName: OnWallRunUp
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 8b8ffca3-674d-47df-bd47-88d396357726
+    m_ActionName: 'Player/WallRunUp[/Keyboard/leftCtrl]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1086010138}
+        m_TargetAssemblyTypeName: PlayerCore, Assembly-CSharp
+        m_MethodName: OnWallRunDown
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 350282df-9a44-460f-9d48-bf2a95b7aef2
+    m_ActionName: 'Player/WallRunDown[/Keyboard/leftAlt]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
