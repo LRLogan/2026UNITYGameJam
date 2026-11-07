@@ -1006,9 +1006,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   wallRunForce: 5
-  maxWallRunTime: 2
-  wallCheckDist: 1
-  minJumpHeight: 1
+  maxWallRunTime: 1.5
+  wallCheckDist: 0.7
+  minJumpHeight: 2
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
