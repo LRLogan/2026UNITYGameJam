@@ -1,3 +1,4 @@
+using System.IO.IsolatedStorage;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -18,10 +19,13 @@ public class PlayerCore : MonoBehaviour
     [SerializeField] private float groundAcc = 25f;
     [SerializeField] private float maxGroundSpeed = 8f;
     [SerializeField] private float groundFriction = 10f;
+    [SerializeField] private float jumpForce = 0.75f;
     private Rigidbody rb;
     private Vector3 moveDir;
     private float xRot;
     private float curSpeed;
+    private bool canJump;
+    private bool jumpHeld;
 
 
     [Header("Ground detection")]
@@ -32,8 +36,6 @@ public class PlayerCore : MonoBehaviour
     private bool isGrounded;
     private Vector3 groundNormal = Vector3.up;
     private float groundAngle;
-
-
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -53,11 +55,14 @@ public class PlayerCore : MonoBehaviour
     {
         CheckGround();
 
-        #region main movement and directional updates
+        // Can jump check
+        if (jumpHeld && isGrounded && canJump) Jump();
+
+        #region Main movement and directional updates
         // Get movement direction relative to the player
         Vector3 desiredDir =
-            transform.forward * moveDir.z +
-            transform.right * moveDir.x;
+        transform.forward * moveDir.z +
+        transform.right * moveDir.x;
 
         if (desiredDir.sqrMagnitude > 1f)
         {
@@ -113,8 +118,7 @@ public class PlayerCore : MonoBehaviour
         float currentSpeed = velocity.magnitude;
         float targetSpeed = maxGroundSpeed;
 
-        Vector3 targetVelocity =
-            desiredDir * targetSpeed;
+        Vector3 targetVelocity = desiredDir * targetSpeed;
 
         velocity = Vector3.MoveTowards(
             velocity,
@@ -166,6 +170,8 @@ public class PlayerCore : MonoBehaviour
             );
 
             isGrounded = groundAngle <= maxSlopeAngle;
+
+            if (isGrounded) canJump = true;
         }
         else
         {
@@ -173,6 +179,14 @@ public class PlayerCore : MonoBehaviour
             groundAngle = 0f;
             isGrounded = false;
         }
+    }
+
+    private void Jump()
+    {
+        canJump = false;
+        isGrounded = false;
+
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
 
@@ -214,6 +228,13 @@ public class PlayerCore : MonoBehaviour
             0f,
             input.y
         );
+    }
+
+    public void OnJump(InputAction.CallbackContext ctx)
+    {
+        // Offloads checks to FixedUpdate to account for holding the jump
+        if (ctx.performed) jumpHeld = true;
+        if (ctx.canceled) jumpHeld = false;
     }
 
     #endregion
