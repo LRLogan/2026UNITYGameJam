@@ -22,7 +22,7 @@ public class PlayerCore : MonoBehaviour
     [SerializeField] private Transform orientation;
 
 
-    [Header("Movement")]
+    [Header("Bace Movement")]
     [SerializeField] private float groundWalkAcc = 15f;
     [SerializeField] private float groundSprintAcc = 25f;
     [SerializeField] private float maxGroundWalkSpeed = 6f;
@@ -39,6 +39,20 @@ public class PlayerCore : MonoBehaviour
     private bool isSprinting;
     private MovementState movementState = MovementState.Air;
     private bool jumpAscending;
+
+    [Header("Wallrunning")]
+    [SerializeField] LayerMask wallLayer;
+    [SerializeField] private float wallRunForce;
+    [SerializeField] private float maxWallRunTime;
+    private float wallRunTimer;
+
+    [Header("Wall running detection")]
+    [SerializeField] private float wallCheckDist;
+    [SerializeField] private float minJumpHeight;
+    private RaycastHit leftWallHit;
+    private RaycastHit rightWallHit;
+    private bool wallLeft;
+    private bool wallRight;
 
 
     [Header("Ground detection")]
