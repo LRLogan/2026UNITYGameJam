@@ -20,6 +20,9 @@ public class PlayerCore : MonoBehaviour
     [SerializeField] private float maxGroundSpeed = 8f;
     [SerializeField] private float groundFriction = 10f;
     [SerializeField] private float jumpForce = 0.75f;
+    [SerializeField] private float maxAirSpeed = 10f;
+    [SerializeField] private float airAcc = 3f;
+    [SerializeField] private float airControl = 5f;
     private Rigidbody rb;
     private Vector3 moveDir;
     private float xRot;
@@ -81,10 +84,8 @@ public class PlayerCore : MonoBehaviour
         curSpeed = horizontalVelocity.magnitude;
 
         // Apply movement
-        if (isGrounded)
-        {
-            GroundMove(ref horizontalVelocity, desiredDir);
-        }
+        if (isGrounded) GroundMove(ref horizontalVelocity, desiredDir);
+        else AirMove(ref horizontalVelocity, desiredDir);
 
         // Recombine horizontal and vertical velocity
         rb.linearVelocity = new Vector3(
@@ -131,6 +132,55 @@ public class PlayerCore : MonoBehaviour
             currentSpeed < maxGroundSpeed)
         {
             velocity = velocity.normalized * currentSpeed;
+        }
+    }
+
+    /// <summary>
+    /// Handles directional movement in air
+    /// </summary>
+    /// <param name="velocity"></param>
+    /// <param name="desiredDir"></param>
+    private void AirMove(ref Vector3 velocity, Vector3 desiredDir)
+    {
+        // No movement input.
+        if (desiredDir.sqrMagnitude < 0.001f) return;
+
+        desiredDir.Normalize();
+
+        // Accelerate toward the desired direction
+        float currentSpeed = Vector3.Dot(
+            velocity,
+            desiredDir
+        );
+        float speedToAdd = maxAirSpeed - currentSpeed;
+
+        // Add speed if we need it
+        if (speedToAdd > 0f)
+        {
+            float acceleration = airAcc * Time.fixedDeltaTime;
+
+            acceleration = Mathf.Min(
+                acceleration,
+                speedToAdd
+            );
+
+            velocity += desiredDir * acceleration;
+        }
+
+        // Rotate existing momentum toward the new direction
+        float currentMagnitude = velocity.magnitude;
+        if (currentMagnitude > 0.01f)
+        {
+            Vector3 currentDirection = velocity.normalized;
+
+            Vector3 newDirection = Vector3.RotateTowards(
+                currentDirection,
+                desiredDir,
+                airControl * Time.fixedDeltaTime,
+                0f
+            );
+
+            velocity = newDirection * currentMagnitude;
         }
     }
 
