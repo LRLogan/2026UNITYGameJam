@@ -1,5 +1,3 @@
-using System.IO.IsolatedStorage;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,7 +5,8 @@ public enum MovementState
 {
     Ground,
     Slope,
-    Air
+    Air,
+    Wallrunning
 }
 
 public class PlayerCore : MonoBehaviour
@@ -45,6 +44,9 @@ public class PlayerCore : MonoBehaviour
     [SerializeField] private float wallRunForce;
     [SerializeField] private float maxWallRunTime;
     private float wallRunTimer;
+    private bool runningOnRightWall;
+    private bool gravityBeforeWallRun;
+
 
     [Header("Wall running detection")]
     [SerializeField] private float wallCheckDist;
@@ -75,18 +77,21 @@ public class PlayerCore : MonoBehaviour
         rb.freezeRotation = true;
     }
 
-    // Update is called once per frame
     private void FixedUpdate()
     {
         Vector3 velocity = rb.linearVelocity;
-        movementState = CheckGround(velocity.y);
+        MovementState nextState = ResolveMovementState(velocity.y);
 
-        bool canJump = jumpHeld && movementState != MovementState.Air;
+        bool canJump = jumpHeld &&
+            (nextState == MovementState.Ground || nextState == MovementState.Slope);
+
         if (canJump)
         {
             velocity.y = 0f;
-            movementState = MovementState.Air;
+            nextState = MovementState.Air;
         }
+
+        ChangeMovementState(nextState);
 
         // Get the desired direction
         Vector3 desiredDir =
@@ -95,27 +100,121 @@ public class PlayerCore : MonoBehaviour
 
         if (desiredDir.sqrMagnitude > 1f) desiredDir.Normalize();
 
-        // Check movement state and apply movement accordingly
-        if (movementState == MovementState.Slope)
-        {
-            SlopeMove(ref velocity, desiredDir);
-        }
-        else
-        {
-            Vector3 horizontalVelocity = new Vector3(velocity.x, 0f, velocity.z);
-
-            if (movementState == MovementState.Ground)
-                GroundMove(ref horizontalVelocity, desiredDir);
-            else
-                AirMove(ref horizontalVelocity, desiredDir);
-
-            velocity.x = horizontalVelocity.x;
-            velocity.z = horizontalVelocity.z;
-        }
-
+        ApplyMovement(ref velocity, desiredDir);
         rb.linearVelocity = velocity;
 
         if (canJump) Jump();
+    }
+
+    private void OnDisable()
+    {
+        ChangeMovementState(MovementState.Air);
+        jumpAscending = false;
+    }
+
+    #region Movement state machine
+    private MovementState ResolveMovementState(float verticalSpeed)
+    {
+        MovementState groundState = CheckGround();
+
+        // The sphere cast can still reach the floor just after takeoff.
+        jumpAscending = jumpAscending && verticalSpeed > 0f;
+        if (groundState != MovementState.Air && !jumpAscending)
+            return groundState;
+
+        if (movementState == MovementState.Wallrunning)
+        {
+            if (wallRunTimer <= 0f)
+                return MovementState.Air;
+
+            CheckForWall();
+            bool hasRunWall = runningOnRightWall ? wallRight : wallLeft;
+            return hasRunWall ? MovementState.Wallrunning : MovementState.Air;
+        }
+
+        // Wait until the ground probe is clear so leveling out won't end the run.
+        if (groundState == MovementState.Air && verticalSpeed > 0f &&
+            maxWallRunTime > 0f && AboveGround())
+        {
+            CheckForWall();
+            if (wallLeft || wallRight)
+                return MovementState.Wallrunning;
+        }
+
+        return MovementState.Air;
+    }
+
+    private void ChangeMovementState(MovementState nextState)
+    {
+        if (movementState == nextState) return;
+
+        if (movementState == MovementState.Wallrunning)
+            StopWallRun();
+
+        movementState = nextState;
+
+        if (movementState == MovementState.Wallrunning)
+            StartWallrun();
+    }
+
+    private void ApplyMovement(ref Vector3 velocity, Vector3 desiredDir)
+    {
+        Vector3 horizontalVelocity = new Vector3(velocity.x, 0f, velocity.z);
+
+        switch (movementState)
+        {
+            case MovementState.Ground:
+                GroundMove(ref horizontalVelocity, desiredDir);
+                break;
+            case MovementState.Air:
+                AirMove(ref horizontalVelocity, desiredDir);
+                break;
+            case MovementState.Slope:
+                SlopeMove(ref velocity, desiredDir);
+                return;
+            case MovementState.Wallrunning:
+                WallRunMove(ref velocity);
+                return;
+        }
+
+        velocity.x = horizontalVelocity.x;
+        velocity.z = horizontalVelocity.z;
+    }
+    #endregion
+
+    #region Movement behaviors
+    private void Jump()
+    {
+        jumpAscending = true;
+
+        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+    }
+
+    private void StartWallrun()
+    {
+        runningOnRightWall = wallRight && (!wallLeft || rightWallHit.distance <= leftWallHit.distance);
+        wallRunTimer = maxWallRunTime;
+
+        gravityBeforeWallRun = rb.useGravity;
+        rb.useGravity = false;
+    }
+
+    private void WallRunMove(ref Vector3 velocity)
+    {
+        Vector3 wallNormal = runningOnRightWall ? rightWallHit.normal : leftWallHit.normal;
+        Vector3 wallForward = Vector3.Cross(wallNormal, Vector3.up).normalized;
+
+        if (Vector3.Dot(wallForward, transform.forward) < 0f)
+            wallForward = -wallForward;
+
+        velocity = Vector3.Dot(velocity, wallForward) * wallForward;
+        rb.AddForce(wallForward * wallRunForce, ForceMode.Force);
+        wallRunTimer -= Time.fixedDeltaTime;
+    }
+
+    private void StopWallRun()
+    {
+        rb.useGravity = gravityBeforeWallRun;
     }
 
     /// <summary>
@@ -138,12 +237,12 @@ public class PlayerCore : MonoBehaviour
         ).normalized;
 
         float currentSpeed = velocity.magnitude;
-        float targetSpeed = isSprinting ? 
+        float targetSpeed = isSprinting ?
             maxGroundSprintSpeed : maxGroundWalkSpeed;
 
         Vector3 targetVelocity = desiredDir * targetSpeed;
         float distDelta = isSprinting ?
-            maxGroundSprintSpeed * Time.fixedDeltaTime : 
+            maxGroundSprintSpeed * Time.fixedDeltaTime :
             maxGroundWalkSpeed * Time.fixedDeltaTime;
 
         velocity = Vector3.MoveTowards(
@@ -155,9 +254,9 @@ public class PlayerCore : MonoBehaviour
         // Preserve momentum when climbing slopes.
         if (currentSpeed > velocity.magnitude)
         {
-            if((currentSpeed < maxGroundWalkSpeed && !isSprinting) ||
+            if ((currentSpeed < maxGroundWalkSpeed && !isSprinting) ||
                 currentSpeed < maxGroundSprintSpeed && isSprinting)
-            velocity = velocity.normalized * currentSpeed;
+                velocity = velocity.normalized * currentSpeed;
         }
     }
 
@@ -236,6 +335,7 @@ public class PlayerCore : MonoBehaviour
             acceleration * Time.fixedDeltaTime
         );
     }
+    #endregion
 
     private void ApplyGroundFriction(ref Vector3 velocity)
     {
@@ -249,16 +349,9 @@ public class PlayerCore : MonoBehaviour
     /// <summary>
     /// Spherecast based ground detection
     /// </summary>
-    /// <param name="verticalSpeed"></param>
     /// <returns></returns>
-    private MovementState CheckGround(float verticalSpeed)
+    private MovementState CheckGround()
     {
-        // The sphere cast can still reach the floor just after takeoff.
-        if (jumpAscending && verticalSpeed > 0f)
-            return MovementState.Air;
-
-        jumpAscending = false;
-
         if (!Physics.SphereCast(
             transform.position,
             groundProbeRadius,
@@ -286,13 +379,25 @@ public class PlayerCore : MonoBehaviour
         return MovementState.Slope;
     }
 
-    private void Jump()
+    private void CheckForWall()
     {
-        jumpAscending = true;
+        wallRight = Physics.Raycast(
+            transform.position, transform.right, out rightWallHit,
+            wallCheckDist, wallLayer, QueryTriggerInteraction.Ignore);
 
-        rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        wallLeft = Physics.Raycast(
+            transform.position, -transform.right, out leftWallHit,
+            wallCheckDist, wallLayer, QueryTriggerInteraction.Ignore);
     }
 
+    /// <summary>
+    /// Simple helper to check for appropriate height to start wallrunning
+    /// </summary>
+    /// <returns></returns>
+    private bool AboveGround()
+    {
+        return !Physics.Raycast(transform.position, Vector3.down, minJumpHeight, groundLayer, QueryTriggerInteraction.Ignore);
+    }
 
     #region Player Input Endpoints
     public void OnLook(InputAction.CallbackContext ctx)
