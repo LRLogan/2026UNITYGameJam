@@ -16,8 +16,10 @@ public class PlayerCore : MonoBehaviour
 
 
     [Header("Movement")]
-    [SerializeField] private float groundAcc = 25f;
-    [SerializeField] private float maxGroundSpeed = 8f;
+    [SerializeField] private float groundWalkAcc = 15f;
+    [SerializeField] private float groundSprintAcc = 25f;
+    [SerializeField] private float maxGroundWalkSpeed = 6f;
+    [SerializeField] private float maxGroundSprintSpeed = 15f;
     [SerializeField] private float groundFriction = 10f;
     [SerializeField] private float jumpForce = 0.75f;
     [SerializeField] private float maxAirSpeed = 10f;
@@ -29,6 +31,7 @@ public class PlayerCore : MonoBehaviour
     private float curSpeed;
     private bool canJump;
     private bool jumpHeld;
+    private bool isSprinting;
 
 
     [Header("Ground detection")]
@@ -117,20 +120,25 @@ public class PlayerCore : MonoBehaviour
         ).normalized;
 
         float currentSpeed = velocity.magnitude;
-        float targetSpeed = maxGroundSpeed;
+        float targetSpeed = isSprinting ? 
+            maxGroundSprintSpeed : maxGroundWalkSpeed;
 
         Vector3 targetVelocity = desiredDir * targetSpeed;
+        float distDelta = isSprinting ?
+            maxGroundSprintSpeed * Time.fixedDeltaTime : 
+            maxGroundWalkSpeed * Time.fixedDeltaTime;
 
         velocity = Vector3.MoveTowards(
             velocity,
             targetVelocity,
-            groundAcc * Time.fixedDeltaTime
+            distDelta
         );
 
         // Preserve momentum when climbing slopes.
-        if (currentSpeed > velocity.magnitude &&
-            currentSpeed < maxGroundSpeed)
+        if (currentSpeed > velocity.magnitude)
         {
+            if((currentSpeed < maxGroundWalkSpeed && !isSprinting) ||
+                currentSpeed < maxGroundSprintSpeed && isSprinting)
             velocity = velocity.normalized * currentSpeed;
         }
     }
@@ -278,6 +286,12 @@ public class PlayerCore : MonoBehaviour
             0f,
             input.y
         );
+    }
+
+    public void OnSprint(InputAction.CallbackContext ctx)
+    {
+        if (ctx.performed) isSprinting = true;
+        if (ctx.canceled) isSprinting = false;
     }
 
     public void OnJump(InputAction.CallbackContext ctx)
