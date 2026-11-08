@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using static Unity.Collections.Unicode;
 using DG.Tweening;
+using System;
 
 public enum MovementState
 {
@@ -86,6 +87,10 @@ public class PlayerCore : MonoBehaviour
     [SerializeField] private float maxSlopeAngle = 50f;
     [SerializeField] private float groundProbeRadius = 0.3f;
     private Vector3 groundNormal = Vector3.up;
+
+    [Header("Health")]
+    [SerializeField] int maxHealth = 100;
+    private int health;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -783,4 +788,10 @@ public class PlayerCore : MonoBehaviour
     }
 
     #endregion
+
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+        health = Math.Max(health, 0);
+    }
 }
