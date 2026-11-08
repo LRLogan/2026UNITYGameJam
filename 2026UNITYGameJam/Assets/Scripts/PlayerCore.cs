@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using static Unity.Collections.Unicode;
 using DG.Tweening;
-using System;
 
 public enum MovementState
 {
@@ -89,9 +88,16 @@ public class PlayerCore : MonoBehaviour
     private Vector3 groundNormal = Vector3.up;
 
     [Header("Health")]
-    [SerializeField] int maxHealth = 100;
+    [SerializeField, Min(1)] private int maxHealth = 100;
     private int health;
 
+    public int Health => health;
+    internal Transform AimTransform => playerCamera != null ? playerCamera.transform : transform;
+
+    private void Awake()
+    {
+        health = maxHealth;
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -791,7 +797,11 @@ public class PlayerCore : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        health -= damage;
-        health = Math.Max(health, 0);
+        if (damage > 0) health -= Mathf.Min(damage, health);
+    }
+
+    public void Heal(int amount)
+    {
+        if (amount > 0) health += Mathf.Min(amount, maxHealth - health);
     }
 }

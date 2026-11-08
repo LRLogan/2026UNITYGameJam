@@ -1,12 +1,10 @@
-using System;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private float detectionRad;
-    [SerializeField] private int maxHealth = 100;
+    [SerializeField, Min(1)] private int maxHealth = 100;
     public int health;
     private Camera playerCamera;
 
@@ -14,13 +12,10 @@ public class Enemy : MonoBehaviour
     [SerializeField] private Slider healthSlider;
     [SerializeField] private Transform healthSliderContainer;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        // Assign player cam
-        if (playerCamera == null)
-            playerCamera = Camera.main;
+    public bool IsAlive => health > 0;
 
+    private void Awake()
+    {
         health = maxHealth;
         if (healthSlider != null)
         {
@@ -31,16 +26,15 @@ public class Enemy : MonoBehaviour
         UpdateHealthBar();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-        
+        playerCamera = Camera.main;
     }
 
     private void LateUpdate()
     {
         // Keep health bar parallel to camera's screen
-        if(playerCamera != null)
+        if (playerCamera != null && healthSliderContainer != null)
             healthSliderContainer.rotation = playerCamera.transform.rotation;
     }
 
@@ -54,9 +48,16 @@ public class Enemy : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        health -= damage;
-        health = Math.Max(health, 0);
+        if (!IsAlive || damage <= 0) return;
 
+        health -= Mathf.Min(damage, health);
         UpdateHealthBar();
+
+        if (!IsAlive) Destroy(gameObject);
+    }
+
+    public void Kill()
+    {
+        TakeDamage(health);
     }
 }
