@@ -66,7 +66,10 @@ public class Revolver : MonoBehaviour
     /// <returns></returns>
     private GameObject ShootStandard()
     {
-        Physics.SphereCast(bulletOrigin.position, bulletRad, player.transform.forward, out RaycastHit hit);
+        if(Physics.SphereCast(bulletOrigin.position, bulletRad, player.transform.forward, out RaycastHit hit))
+        {
+            
+        }
 
         return null;
     }
