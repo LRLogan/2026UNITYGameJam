@@ -241,6 +241,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 218217473}
+  - component: {fileID: 218217474}
   m_Layer: 0
   m_Name: WeaponHolder
   m_TagString: Untagged
@@ -263,6 +264,39 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1086010137}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &218217474
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 218217472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31c543b27ed4334458459af2897689b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Revolver
+  player: {fileID: 1086010138}
+  bulletOrigin: {fileID: 218217473}
+  bulletRad: 0.5
+  shotRange: 100
+  standardDamage: 20
+  shotLayers:
+    serializedVersion: 2
+    m_Bits: 256
+  luckyChamberWeight: 1.25
+  jackpotHeal: 25
+  jackpotEffects:
+    enemyLayer:
+      serializedVersion: 2
+      m_Bits: 4294967291
+    explosionRadius: 4
+    explosionDamage: 50
+    explosionSelfDamage: 30
+    lightningRadius: 5
+    lightningDamage: 35
+    lightningSelfDamage: 20
+    lightningMaxHops: 3
 --- !u!1 &321060247
 GameObject:
   m_ObjectHideFlags: 0
@@ -1250,6 +1284,7 @@ MonoBehaviour:
   groundCheckDistance: 1.5
   maxSlopeAngle: 50
   groundProbeRadius: 0.3
+  maxHealth: 100
 --- !u!114 &1086010139
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1335,14 +1370,6 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: f1ba0d36-48eb-4cd5-b651-1c94a6531f70
     m_ActionName: 'Player/Jump[/Keyboard/space]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 2776c80d-3c14-4091-8c56-d04ced07a2b0
-    m_ActionName: 'Player/Previous[/Keyboard/1]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: b7230bb6-fc9b-4f52-8b25-f5e19cb2c2ba
-    m_ActionName: 'Player/Next[/Keyboard/2]'
   - m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1086010138}
@@ -1431,6 +1458,54 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 350282df-9a44-460f-9d48-bf2a95b7aef2
     m_ActionName: 'Player/WallRunDown[/Keyboard/leftAlt]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 218217474}
+        m_TargetAssemblyTypeName: Revolver, Assembly-CSharp
+        m_MethodName: OnReload
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 7f356cbe-58ef-4050-a0ba-6e26b463dc5f
+    m_ActionName: 'Player/Reload[/Keyboard/r]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 218217474}
+        m_TargetAssemblyTypeName: Revolver, Assembly-CSharp
+        m_MethodName: OnShoot
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: cc56aac9-a6a1-44ca-a482-611a642f5244
+    m_ActionName: 'Player/Shoot[/Mouse/leftButton]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 218217474}
+        m_TargetAssemblyTypeName: Revolver, Assembly-CSharp
+        m_MethodName: OnSpin
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: e9f1084c-8209-4e1d-beae-fc740c6afe56
+    m_ActionName: 'Player/Spin[/Keyboard/t]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player

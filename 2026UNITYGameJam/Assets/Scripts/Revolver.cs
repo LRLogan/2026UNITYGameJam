@@ -16,7 +16,7 @@ public class Revolver : MonoBehaviour
     [SerializeField, Min(0.01f)] private float bulletRad = 0.5f;
     [SerializeField, Min(1f)] private float shotRange = 100f;
     [SerializeField, Min(1)] private int standardDamage = 20;
-    [SerializeField] private LayerMask shotLayers = Physics.DefaultRaycastLayers;
+    [SerializeField] private LayerMask detectionLayers = Physics.DefaultRaycastLayers;
 
     [Header("Jackpot")]
     [SerializeField, Range(1f, 2f)] private float luckyChamberWeight = 1.25f;
@@ -81,6 +81,7 @@ public class Revolver : MonoBehaviour
 
     public void Shoot()
     {
+        Debug.Log("HIT");
         if (!CanUseWeapon || player == null || !cylinder.TryFire(out BulletType bullet)) return;
 
         Enemy target = FindShotTarget(out Vector3 hitPoint);
@@ -102,7 +103,7 @@ public class Revolver : MonoBehaviour
         Transform aim = player.AimTransform;
         Vector3 origin = bulletOrigin != null ? bulletOrigin.position : aim.position;
         RaycastHit[] hits = Physics.SphereCastAll(origin, bulletRad, aim.forward, shotRange,
-            shotLayers, QueryTriggerInteraction.Ignore);
+            detectionLayers, QueryTriggerInteraction.Ignore);
 
         // The closest solid hit blocks the shot. Ignore the shooter's own colliders
         float closestDistance = float.PositiveInfinity;
