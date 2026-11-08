@@ -5,7 +5,8 @@ using UnityEngine.InputSystem;
 
 public enum BulletType
 {
-    Standard
+    Standard,
+    Jackpot
 }
 
 public class Revolver : MonoBehaviour
@@ -22,9 +23,9 @@ public class Revolver : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        // Start the player with 1 less than the max ammo ct
+        // Fill up the chamber
         ammo = new Stack<BulletType>();
-        while(curAmmoCt < maxAmmoCt - 1) ammo.Push(BulletType.Standard);
+        while(curAmmoCt < maxAmmoCt) ammo.Push(BulletType.Standard);
     }
 
     // Update is called once per frame
