@@ -281,7 +281,7 @@ MonoBehaviour:
   bulletRad: 0.5
   shotRange: 100
   standardDamage: 20
-  shotLayers:
+  detectionLayers:
     serializedVersion: 2
     m_Bits: 256
   luckyChamberWeight: 1.25
