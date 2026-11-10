@@ -22,6 +22,12 @@ public class GameManager : MonoBehaviour
     // Events 
     public event Action RoundStarted;
     public event Action RoundEnded;
+    public event Action ScoreChanged;
+
+    void Start()
+    {
+        StartRound(4);
+    }
 
     public void StartRound(int luckyNumber)
     {
@@ -48,6 +54,7 @@ public class GameManager : MonoBehaviour
         TotalScore += LastRoundJackpotPoints;
         PendingJackpotPoints = 0;
         if (revolver != null) revolver.EndRound();
+        ScoreChanged?.Invoke();
         RoundEnded?.Invoke();
     }
 
@@ -57,7 +64,9 @@ public class GameManager : MonoBehaviour
     /// <param name="hit"></param>
     internal void RecordJackpotShot(bool hit)
     {
-        if (IsRoundActive)
-            PendingJackpotPoints += hit ? jackpotHitBonus : -jackpotMissPenalty;
+        if (!IsRoundActive) return;
+
+        PendingJackpotPoints += hit ? jackpotHitBonus : -jackpotMissPenalty;
+        ScoreChanged?.Invoke();
     }
 }

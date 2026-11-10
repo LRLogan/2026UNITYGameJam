@@ -81,7 +81,6 @@ public class Revolver : MonoBehaviour
 
     public void Shoot()
     {
-        Debug.Log("HIT");
         if (!CanUseWeapon || player == null || !cylinder.TryFire(out BulletType bullet)) return;
 
         Enemy target = FindShotTarget(out Vector3 hitPoint);
