@@ -17,11 +17,13 @@ internal sealed class RevolverCylinder
     internal const int ChamberCount = 6;
 
     private readonly Random random;
+    private int luckyShotNumber;
     private int jackpotShotNumber;
 
     internal int AmmoRemaining { get; private set; }
     internal int NextShotNumber => AmmoRemaining == 0 ? 0 : ChamberCount - AmmoRemaining + 1;
-    internal bool NextShotIsJackpot => AmmoRemaining > 0 && NextShotNumber == jackpotShotNumber;
+    internal bool NextShotIsJackpot => AmmoRemaining > 0 &&
+        NextShotNumber == luckyShotNumber && NextShotNumber == jackpotShotNumber;
 
     internal RevolverCylinder(Random random)
     {
@@ -31,24 +33,29 @@ internal sealed class RevolverCylinder
     internal void Reload(int luckyNumber, float luckyChamberWeight)
     {
         AmmoRemaining = ChamberCount;
-
-        // Give the lucky chamber extra weight while keeping the other five equally likely.
-        double roll = random.NextDouble() * (ChamberCount - 1 + (double)luckyChamberWeight);
-        if (roll < luckyChamberWeight)
-        {
-            jackpotShotNumber = luckyNumber;
-            return;
-        }
-
-        int otherChamber = 1 + (int)(roll - luckyChamberWeight);
-        jackpotShotNumber = otherChamber < luckyNumber ? otherChamber : otherChamber + 1;
+        luckyShotNumber = luckyNumber;
+        jackpotShotNumber = RollJackpotPosition(luckyChamberWeight);
     }
 
-    internal void Spin()
+    internal void Spin(float luckyChamberWeight)
     {
         // Only the jackpot's position can change because the other rounds are identical.
         if (AmmoRemaining > 1 && jackpotShotNumber != 0)
-            jackpotShotNumber = random.Next(NextShotNumber, ChamberCount + 1);
+            jackpotShotNumber = RollJackpotPosition(luckyChamberWeight);
+    }
+
+    private int RollJackpotPosition(float luckyChamberWeight)
+    {
+        int firstShot = NextShotNumber;
+        if (luckyShotNumber < firstShot)
+            return random.Next(firstShot, ChamberCount + 1);
+
+        // Weight the lucky chamber among the unfired shots.
+        double roll = random.NextDouble() * (AmmoRemaining - 1 + (double)luckyChamberWeight);
+        if (roll < luckyChamberWeight) return luckyShotNumber;
+
+        int otherShot = firstShot + (int)(roll - luckyChamberWeight);
+        return otherShot < luckyShotNumber ? otherShot : otherShot + 1;
     }
 
     internal bool TryFire(out BulletType bullet)
@@ -56,11 +63,10 @@ internal sealed class RevolverCylinder
         bullet = BulletType.Standard;
         if (AmmoRemaining == 0) return false;
 
-        if (NextShotIsJackpot)
-        {
-            bullet = BulletType.Jackpot;
-            jackpotShotNumber = 0;
-        }
+        if (NextShotIsJackpot) bullet = BulletType.Jackpot;
+
+        // Firing the jackpot round outside the lucky chamber consumes it as a standard shot.
+        if (NextShotNumber == jackpotShotNumber) jackpotShotNumber = 0;
 
         AmmoRemaining--;
         return true;
@@ -69,6 +75,7 @@ internal sealed class RevolverCylinder
     internal void Clear()
     {
         AmmoRemaining = 0;
+        luckyShotNumber = 0;
         jackpotShotNumber = 0;
     }
 }

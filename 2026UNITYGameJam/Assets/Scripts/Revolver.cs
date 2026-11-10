@@ -75,7 +75,7 @@ public class Revolver : MonoBehaviour
     {
         if (!CanUseWeapon || AmmoRemaining == 0) return;
 
-        cylinder.Spin();
+        cylinder.Spin(luckyChamberWeight);
         CylinderChanged?.Invoke();
     }
 
