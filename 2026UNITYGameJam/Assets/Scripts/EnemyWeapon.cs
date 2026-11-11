@@ -5,15 +5,47 @@ using UnityEngine;
 /// </summary>
 public class EnemyWeapon : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [SerializeField] private Transform bulletOrigin;
+    [SerializeField, Min(0)] private int damage = 10;
+    [SerializeField, Min(0.01f)] private float shotCooldown = 1f;
+    [SerializeField, Min(0f)] private float shotRange = 30f;
+    [SerializeField] private LayerMask detectionLayers = Physics.DefaultRaycastLayers;
+
+    private Enemy owner;
+    private float nextShotTime;
+
+    private void Awake()
     {
-        
+        owner = GetComponentInParent<Enemy>();
     }
 
-    // Update is called once per frame
-    void Update()
+    public bool TryShoot(PlayerCore target, Vector3 aimPoint)
     {
-        
+        if (!isActiveAndEnabled || owner == null || !owner.isActiveAndEnabled || !owner.IsAlive ||
+            target == null || !target.isActiveAndEnabled || target.Health <= 0 || Time.time < nextShotTime)
+            return false;
+
+        Vector3 origin = bulletOrigin != null ? bulletOrigin.position : transform.position;
+        Vector3 direction = aimPoint - origin;
+        if (direction.sqrMagnitude < 0.001f || direction.sqrMagnitude > shotRange * shotRange) return false;
+
+        nextShotTime = Time.time + Mathf.Max(0.01f, shotCooldown);
+        RaycastHit[] hits = Physics.RaycastAll(origin, direction.normalized, shotRange,
+            detectionLayers, QueryTriggerInteraction.Ignore);
+
+        // RaycastAll is unordered. Skip our own colliders and keep the closest solid hit.
+        float closestDistance = float.PositiveInfinity;
+        PlayerCore hitPlayer = null;
+        foreach (RaycastHit hit in hits)
+        {
+            if (hit.distance >= closestDistance || hit.collider.GetComponentInParent<Enemy>() == owner)
+                continue;
+
+            closestDistance = hit.distance;
+            hitPlayer = hit.collider.GetComponentInParent<PlayerCore>();
+        }
+
+        if (hitPlayer == target) target.TakeDamage(damage);
+        return true;
     }
 }
