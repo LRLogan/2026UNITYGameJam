@@ -92,11 +92,13 @@ public class PlayerCore : MonoBehaviour
     private int health;
 
     public int Health => health;
+    public int MaxHealth => maxHealth;
+    public event System.Action HealthChanged;
     internal Transform AimTransform => playerCamera != null ? playerCamera.transform : transform;
 
     private void Awake()
     {
-        health = maxHealth;
+        SetHealth(maxHealth);
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -797,11 +799,19 @@ public class PlayerCore : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        if (damage > 0) health -= Mathf.Min(damage, health);
+        if (damage > 0) SetHealth(health - Mathf.Min(damage, health));
     }
 
     public void Heal(int amount)
     {
-        if (amount > 0) health += Mathf.Min(amount, maxHealth - health);
+        if (amount > 0) SetHealth(health + Mathf.Min(amount, maxHealth - health));
+    }
+
+    private void SetHealth(int value)
+    {
+        if (health == value) return;
+
+        health = value;
+        HealthChanged?.Invoke();
     }
 }

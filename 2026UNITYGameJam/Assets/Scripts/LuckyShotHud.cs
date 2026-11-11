@@ -5,6 +5,7 @@ public class LuckyShotHud : MonoBehaviour
 {
     [SerializeField] private Revolver revolver;
     [SerializeField] private GameManager gameManager;
+    [SerializeField] private PlayerCore player;
     [SerializeField] private TextMeshProUGUI ammoText;
     [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private UnityEngine.UI.Image[] crosshairBars;
@@ -14,16 +15,19 @@ public class LuckyShotHud : MonoBehaviour
     private void OnEnable()
     {
         if (revolver != null) revolver.CylinderChanged += RefreshCylinder;
-        if (gameManager != null) gameManager.ScoreChanged += RefreshScore;
+        if (gameManager != null) gameManager.ScoreChanged += RefreshStatus;
+        if (player == null) player = FindFirstObjectByType<PlayerCore>();
+        if (player != null) player.HealthChanged += RefreshStatus;
 
         RefreshCylinder();
-        RefreshScore();
+        RefreshStatus();
     }
 
     private void OnDisable()
     {
         if (revolver != null) revolver.CylinderChanged -= RefreshCylinder;
-        if (gameManager != null) gameManager.ScoreChanged -= RefreshScore;
+        if (gameManager != null) gameManager.ScoreChanged -= RefreshStatus;
+        if (player != null) player.HealthChanged -= RefreshStatus;
     }
 
     private void RefreshCylinder()
@@ -56,10 +60,19 @@ public class LuckyShotHud : MonoBehaviour
         }
     }
 
-    private void RefreshScore()
+    private void RefreshStatus()
     {
-        if (gameManager == null || scoreText == null) return;
+        if (scoreText == null) return;
 
-        scoreText.text = $"SCORE  {gameManager.TotalScore}\nPENDING  {gameManager.PendingJackpotPoints:+0;-0;0}";
+        string status = gameManager != null
+            ? $"SCORE  {gameManager.TotalScore}\nPENDING  {gameManager.PendingJackpotPoints:+0;-0;0}"
+            : string.Empty;
+        if (player != null)
+        {
+            string health = $"HEALTH  {player.Health} / {player.MaxHealth}";
+            status = status.Length > 0 ? $"{status}\n{health}" : health;
+        }
+
+        scoreText.text = status;
     }
 }
