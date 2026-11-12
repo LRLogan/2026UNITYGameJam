@@ -119,6 +119,37 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &66377910
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 66377911}
+  m_Layer: 0
+  m_Name: SPAWN
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &66377911
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 66377910}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -5.981, y: 11.97, z: 66.262}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 926341463}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &146884662
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -401,7 +432,7 @@ Transform:
   m_GameObject: {fileID: 300427252}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7, y: 0, z: -60.2}
+  m_LocalPosition: {x: 5.92, y: 4.74, z: -67.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -628,7 +659,7 @@ Transform:
   m_GameObject: {fileID: 504874661}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 78.3, y: 0, z: -91.4}
+  m_LocalPosition: {x: 58.798, y: 5.227, z: -92.023}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -997,6 +1028,7 @@ Transform:
   - {fileID: 300427253}
   - {fileID: 1838958059}
   - {fileID: 504874662}
+  - {fileID: 66377911}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &955834585
@@ -1336,11 +1368,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7dc21f16f45640f098430776df3ccc25, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelManager
-  gameManager: {fileID: 0}
-  player: {fileID: 0}
-  spawnPoint: {fileID: 0}
-  objectiveSpawnPoints: []
-  interactRadius: 2
+  gameManager: {fileID: 800958706}
+  spawnPoint: {fileID: 66377911}
+  objectiveSpawnPoints:
+  - {fileID: 300427253}
+  - {fileID: 1838958059}
+  - {fileID: 504874662}
+  interactRadius: 4
   extractionRadius: 3
   interactPrompt: Press Interact to pick up
   mainMenuScene: MainMenu
@@ -1562,7 +1596,7 @@ Transform:
   m_GameObject: {fileID: 1838958058}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 63.8, y: 10.4, z: 51}
+  m_LocalPosition: {x: 64.87, y: 17.075, z: 47.45}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
