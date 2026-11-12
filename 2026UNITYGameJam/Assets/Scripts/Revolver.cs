@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// Actual Revolver weapon responcible for overarching events like shooting the shot
@@ -12,13 +14,17 @@ public class Revolver : MonoBehaviour
     [SerializeField] private PlayerCore player;
 
     [Header("Shooting")]
-    [SerializeField] private Transform bulletOrigin;
     [SerializeField, Min(0.01f)] private float bulletRad = 0.5f;
     [SerializeField, Min(1f)] private float shotRange = 100f;
     [SerializeField, Min(1)] private int standardDamage = 20;
     [SerializeField] private LayerMask detectionLayers = Physics.DefaultRaycastLayers;
-    [SerializeField] private Transform weapon;
-    [SerializeField] private Transform weaponMuzzle;
+
+    [Header("Weapon visuals")]
+    [SerializeField] private Transform weaponCenter;
+    [SerializeField] private Transform weaponCamAllignment;
+    [SerializeField, FormerlySerializedAs("bulletOrigin")] private Transform weaponMuzzle;
+    [SerializeField] private ParticleSystem muzzleFlashPrefab;
+    [SerializeField, Min(0.05f)] private float weaponSpinDuration = 0.35f;
 
     [Header("Jackpot")]
     [SerializeField, Range(1f, 2f)] private float luckyChamberWeight = 1.25f;
@@ -27,6 +33,11 @@ public class Revolver : MonoBehaviour
 
     private readonly RevolverCylinder cylinder = new RevolverCylinder(new System.Random());
     private GameManager gameManager;
+    private Quaternion weaponRestRotation;
+    private Quaternion alignmentRestRotation;
+    private float weaponSpinAngle;
+    private Tween weaponSpinTween;
+    private ParticleSystem muzzleFlash;
 
     public int AmmoRemaining => cylinder.AmmoRemaining;
     public int NextShotNumber => cylinder.NextShotNumber;
@@ -44,6 +55,61 @@ public class Revolver : MonoBehaviour
     private void Awake()
     {
         if (player == null) player = GetComponentInParent<PlayerCore>();
+        if (weaponCenter == null) weaponCenter = transform;
+        if (weaponCamAllignment == null) weaponCamAllignment = weaponCenter;
+        weaponRestRotation = weaponCenter.localRotation;
+        alignmentRestRotation = weaponCamAllignment.localRotation;
+
+        if (weaponMuzzle != null && muzzleFlashPrefab != null)
+        {
+            muzzleFlash = Instantiate(muzzleFlashPrefab, weaponMuzzle, false);
+            muzzleFlash.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            muzzleFlash.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+    }
+
+    private void LateUpdate()
+    {
+        UpdateWeaponRotation();
+    }
+
+    private void OnDisable()
+    {
+        weaponSpinTween?.Kill();
+        weaponSpinTween = null;
+        weaponSpinAngle = 0f;
+        UpdateWeaponRotation();
+        if (muzzleFlash != null) muzzleFlash.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+    }
+
+    private void UpdateWeaponRotation()
+    {
+        if (weaponCamAllignment != null && player != null)
+        {
+            Vector3 aim = player.AimTransform.forward;
+            if (weaponCamAllignment.parent != null)
+                aim = weaponCamAllignment.parent.InverseTransformDirection(aim);
+
+            float horizontal = Mathf.Sqrt(aim.x * aim.x + aim.z * aim.z);
+            float pitch = -Mathf.Atan2(aim.y, horizontal) * Mathf.Rad2Deg;
+            if (weaponCamAllignment == weaponCenter) pitch += weaponSpinAngle;
+            weaponCamAllignment.localRotation = Quaternion.AngleAxis(pitch, Vector3.right) * alignmentRestRotation;
+        }
+
+        if (weaponCenter != null && weaponCenter != weaponCamAllignment)
+            weaponCenter.localRotation = Quaternion.AngleAxis(weaponSpinAngle, Vector3.right) * weaponRestRotation;
+    }
+
+    private void AnimateWeaponSpin()
+    {
+        if (weaponCenter == null) return;
+
+        weaponSpinTween?.Kill();
+        weaponSpinAngle = 0f;
+        weaponSpinTween = DOTween.To(() => weaponSpinAngle, angle => weaponSpinAngle = angle,
+                360f, weaponSpinDuration)
+            .SetEase(Ease.OutCubic)
+            .OnComplete(() => weaponSpinAngle = 0f);
     }
 
     internal void BeginRound(GameManager manager)
@@ -61,7 +127,10 @@ public class Revolver : MonoBehaviour
 
     public void Reload()
     {
-        if (CanUseWeapon) LoadCylinder();
+        if (!CanUseWeapon) return;
+
+        LoadCylinder();
+        AnimateWeaponSpin();
     }
 
     /// <summary>
@@ -78,12 +147,20 @@ public class Revolver : MonoBehaviour
         if (!CanUseWeapon || AmmoRemaining == 0) return;
 
         cylinder.Spin(luckyChamberWeight);
+        AnimateWeaponSpin();
         CylinderChanged?.Invoke();
     }
 
     public void Shoot()
     {
         if (!CanUseWeapon || player == null || !cylinder.TryFire(out BulletType bullet)) return;
+
+        UpdateWeaponRotation();
+        if (muzzleFlash != null)
+        {
+            muzzleFlash.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            muzzleFlash.Play(true);
+        }
 
         Enemy target = FindShotTarget(out Vector3 hitPoint);
         if (bullet == BulletType.Jackpot)
@@ -102,7 +179,7 @@ public class Revolver : MonoBehaviour
     private Enemy FindShotTarget(out Vector3 hitPoint)
     {
         Transform aim = player.AimTransform;
-        Vector3 origin = bulletOrigin != null ? bulletOrigin.position : aim.position;
+        Vector3 origin = weaponMuzzle != null ? weaponMuzzle.position : aim.position;
         RaycastHit[] hits = Physics.SphereCastAll(origin, bulletRad, aim.forward, shotRange,
             detectionLayers, QueryTriggerInteraction.Ignore);
 
