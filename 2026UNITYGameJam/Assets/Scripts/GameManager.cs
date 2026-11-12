@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     public int PendingJackpotPoints { get; private set; }
     public int LastRoundJackpotPoints { get; private set; }
     public int TotalScore { get; private set; }
+    public RoundResult LastResult { get; private set; }
 
     // Events 
     public event Action RoundStarted;
@@ -47,9 +48,20 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void EndRound()
     {
+        FinishRound(null);
+    }
+
+    internal void CompleteRound(double elapsedSeconds, PlayerCore player)
+    {
+        FinishRound(new RoundResult(PendingJackpotPoints, elapsedSeconds, player.Health, player.MaxHealth));
+    }
+
+    private void FinishRound(RoundResult? result)
+    {
         if (!IsRoundActive) return;
 
         IsRoundActive = false;
+        if (result.HasValue) LastResult = result.Value;
         LastRoundJackpotPoints = PendingJackpotPoints;
         TotalScore += LastRoundJackpotPoints;
         PendingJackpotPoints = 0;
@@ -68,5 +80,21 @@ public class GameManager : MonoBehaviour
 
         PendingJackpotPoints += hit ? jackpotHitBonus : -jackpotMissPenalty;
         ScoreChanged?.Invoke();
+    }
+}
+
+public readonly struct RoundResult
+{
+    public readonly int Score;
+    public readonly double ElapsedSeconds;
+    public readonly int Health;
+    public readonly int MaxHealth;
+
+    public RoundResult(int score, double elapsedSeconds, int health, int maxHealth)
+    {
+        Score = score;
+        ElapsedSeconds = elapsedSeconds;
+        Health = health;
+        MaxHealth = maxHealth;
     }
 }

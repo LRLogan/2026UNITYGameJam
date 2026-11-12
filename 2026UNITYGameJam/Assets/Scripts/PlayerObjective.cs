@@ -1,16 +1,39 @@
+using TMPro;
 using UnityEngine;
 
 public class PlayerObjective : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private TextMeshPro prompt;
+    private PlayerCore viewer;
+    private LevelManager extractionLevel;
+
+    internal void SetPrompt(TextMeshPro label, PlayerCore player)
     {
-        
+        prompt = label;
+        viewer = player;
+        ShowPrompt(false);
     }
 
-    // Update is called once per frame
-    void Update()
+    internal void ShowPrompt(bool visible)
     {
-        
+        if (prompt != null && prompt.gameObject.activeSelf != visible)
+            prompt.gameObject.SetActive(visible);
+    }
+
+    internal void EnableExtraction(LevelManager level)
+    {
+        extractionLevel = level;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (extractionLevel != null)
+            extractionLevel.TryExtract(other.GetComponentInParent<PlayerCore>());
+    }
+
+    private void LateUpdate()
+    {
+        if (prompt != null && prompt.gameObject.activeSelf && viewer != null)
+            prompt.transform.rotation = viewer.AimTransform.rotation;
     }
 }
