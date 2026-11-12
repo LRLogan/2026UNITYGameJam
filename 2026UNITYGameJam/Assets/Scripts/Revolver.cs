@@ -17,6 +17,8 @@ public class Revolver : MonoBehaviour
     [SerializeField, Min(1f)] private float shotRange = 100f;
     [SerializeField, Min(1)] private int standardDamage = 20;
     [SerializeField] private LayerMask detectionLayers = Physics.DefaultRaycastLayers;
+    [SerializeField] private Transform weapon;
+    [SerializeField] private Transform weaponMuzzle;
 
     [Header("Jackpot")]
     [SerializeField, Range(1f, 2f)] private float luckyChamberWeight = 1.25f;
