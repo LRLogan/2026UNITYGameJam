@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7402191931390800916}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Muzzle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41,7 +41,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1048721119049921551}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: CameraHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74,7 +74,7 @@ GameObject:
   m_Component:
   - component: {fileID: 55447304114156478}
   - component: {fileID: 4925479369429859372}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: WeaponHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -142,7 +142,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 440929741020607344}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Center
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -176,7 +176,7 @@ GameObject:
   - component: {fileID: 7742968960067566416}
   - component: {fileID: 1942316427069253900}
   - component: {fileID: 3101878245628904094}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: MuzzleFlash
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -290,7 +290,7 @@ GameObject:
   - component: {fileID: 6708562224021985385}
   - component: {fileID: 7456040973493629645}
   - component: {fileID: 7358391421827867321}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -584,9 +584,9 @@ MonoBehaviour:
     m_ActionName: 'Player/Jump[/Keyboard/space]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7456040973493629645}
+      - m_Target: {fileID: 6708562224021985385}
         m_TargetAssemblyTypeName: PlayerCore, Assembly-CSharp
-        m_MethodName: 
+        m_MethodName: OnSprint
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -734,7 +734,7 @@ GameObject:
   - component: {fileID: 3449914602096135474}
   - component: {fileID: 1666809160342642915}
   - component: {fileID: 946965226341101904}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -862,6 +862,14 @@ PrefabInstance:
     - target: {fileID: 199669651405181594, guid: 41236ddb97b001d499cadd3503c086dc, type: 3}
       propertyPath: m_Name
       value: pistol_001
+      objectReference: {fileID: 0}
+    - target: {fileID: 199669651405181594, guid: 41236ddb97b001d499cadd3503c086dc, type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 279119747375007141, guid: 41236ddb97b001d499cadd3503c086dc, type: 3}
+      propertyPath: m_Layer
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 560585288466575159, guid: 41236ddb97b001d499cadd3503c086dc, type: 3}
       propertyPath: m_Enabled
