@@ -60,7 +60,7 @@ public class LevelManager : MonoBehaviour
 
     private void Update()
     {
-        if (activeObjective != null) activeObjective.ShowPrompt(CanCollect(player));
+        if (activeObjective != null) activeObjective.ShowPrompt(IsInPickupRange());
     }
 
     private void BeginLevel()
@@ -99,16 +99,15 @@ public class LevelManager : MonoBehaviour
         hud.SetInstructions($"Find objective {totalObjectives - remainingObjectives.Count} / {totalObjectives}");
     }
 
-    private bool CanCollect(PlayerCore candidate)
+    private bool IsInPickupRange()
     {
-        return gameManager != null && gameManager.IsRoundActive && activeObjective != null &&
-            candidate != null && candidate == player &&
-            (candidate.transform.position - activeObjective.transform.position).sqrMagnitude <= interactRadius * interactRadius;
+        return activeObjective != null && player != null &&
+            Vector3.Distance(player.transform.position, activeObjective.transform.position) <= interactRadius;
     }
 
-    internal void TryCollect(PlayerCore candidate)
+    internal void TryCollect()
     {
-        if (!CanCollect(candidate)) return;
+        if (!IsInPickupRange()) return;
 
         RemoveMarker(activeObjective);
         activeObjective = null;
