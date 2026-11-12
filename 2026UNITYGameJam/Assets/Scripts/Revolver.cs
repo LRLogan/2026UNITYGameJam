@@ -23,7 +23,6 @@ public class Revolver : MonoBehaviour
     [SerializeField] private Transform weaponCenter;
     [SerializeField] private Transform weaponCamAllignment;
     [SerializeField, FormerlySerializedAs("bulletOrigin")] private Transform weaponMuzzle;
-    [SerializeField] private ParticleSystem muzzleFlashPrefab;
     [SerializeField, Min(0.05f)] private float weaponSpinDuration = 0.35f;
 
     [Header("Jackpot")]
@@ -37,7 +36,7 @@ public class Revolver : MonoBehaviour
     private Quaternion alignmentRestRotation;
     private float weaponSpinAngle;
     private Tween weaponSpinTween;
-    private ParticleSystem muzzleFlash;
+    private MuzzleFlash muzzleFlash;
 
     public int AmmoRemaining => cylinder.AmmoRemaining;
     public int NextShotNumber => cylinder.NextShotNumber;
@@ -59,13 +58,7 @@ public class Revolver : MonoBehaviour
         if (weaponCamAllignment == null) weaponCamAllignment = weaponCenter;
         weaponRestRotation = weaponCenter.localRotation;
         alignmentRestRotation = weaponCamAllignment.localRotation;
-
-        if (weaponMuzzle != null && muzzleFlashPrefab != null)
-        {
-            muzzleFlash = Instantiate(muzzleFlashPrefab, weaponMuzzle, false);
-            muzzleFlash.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-            muzzleFlash.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-        }
+        if (weaponMuzzle != null) muzzleFlash = weaponMuzzle.GetComponentInChildren<MuzzleFlash>();
     }
 
     private void LateUpdate()
@@ -79,7 +72,6 @@ public class Revolver : MonoBehaviour
         weaponSpinTween = null;
         weaponSpinAngle = 0f;
         UpdateWeaponRotation();
-        if (muzzleFlash != null) muzzleFlash.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
     private void UpdateWeaponRotation()
@@ -156,11 +148,7 @@ public class Revolver : MonoBehaviour
         if (!CanUseWeapon || player == null || !cylinder.TryFire(out BulletType bullet)) return;
 
         UpdateWeaponRotation();
-        if (muzzleFlash != null)
-        {
-            muzzleFlash.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            muzzleFlash.Play(true);
-        }
+        if (muzzleFlash != null && muzzleFlash.isActiveAndEnabled) muzzleFlash.Play();
 
         Enemy target = FindShotTarget(out Vector3 hitPoint);
         if (bullet == BulletType.Jackpot)
