@@ -441,10 +441,11 @@ MonoBehaviour:
   playerCamera: {fileID: 1666809160342642915}
   groundWalkAcc: 90
   groundSprintAcc: 30
+  groundDeceleration: 10
   maxGroundWalkSpeed: 10
   maxGroundSprintSpeed: 15
-  groundFriction: 7
-  jumpForce: 6
+  groundFriction: 25
+  jumpForce: 8
   maxAirSpeed: 10
   airAcc: 3
   airControl: 5

@@ -27,6 +27,7 @@ public class PlayerCore : MonoBehaviour
     [Header("Bace Movement")]
     [SerializeField] private float groundWalkAcc = 15f;
     [SerializeField] private float groundSprintAcc = 25f;
+    [SerializeField] private float groundDeceleration = 10f;
     [SerializeField] private float maxGroundWalkSpeed = 6f;
     [SerializeField] private float maxGroundSprintSpeed = 15f;
     [SerializeField] private float groundFriction = 10f;
@@ -41,6 +42,7 @@ public class PlayerCore : MonoBehaviour
     private bool isSprinting;
     private MovementState movementState = MovementState.Air;
     private bool jumpAscending;
+
 
     [Header("Wallrunning")]
     [SerializeField] LayerMask wallLayer;

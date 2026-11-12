@@ -1057,6 +1057,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 6708562224021985385, guid: 20b21a135765af54ba8b409ad6e03572, type: 3}
+      propertyPath: groundFriction
+      value: 25
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
