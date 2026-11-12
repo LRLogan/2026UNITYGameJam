@@ -7,7 +7,6 @@ using UnityEngine.SceneManagement;
 public class LevelManager : MonoBehaviour
 {
     [SerializeField] private GameManager gameManager;
-    [SerializeField] private PlayerCore player;
     [SerializeField] private Transform spawnPoint;
     [SerializeField] private List<Transform> objectiveSpawnPoints = new List<Transform>();
     [SerializeField, Min(0.1f)] private float interactRadius = 2f;
@@ -15,6 +14,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private string interactPrompt = "Press Interact to pick up";
     [SerializeField] private string mainMenuScene = "MainMenu";
 
+    private PlayerCore player;
     private readonly Queue<Transform> remainingObjectives = new Queue<Transform>();
     private PlayerObjective activeObjective;
     private PlayerObjective extractionZone;
