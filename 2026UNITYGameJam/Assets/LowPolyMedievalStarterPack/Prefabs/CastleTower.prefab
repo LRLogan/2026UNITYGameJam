@@ -52,8 +52,27 @@ PrefabInstance:
       propertyPath: m_Name
       value: CastleTower
       objectReference: {fileID: 0}
+    - target: {fileID: 4742473837712756890, guid: 24737eef34e31c742a64bf534e58e827, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4742473837712756890, guid: 24737eef34e31c742a64bf534e58e827, type: 3}
+      propertyPath: m_LODs.Array.data[1].renderers.Array.data[0].renderer
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4742473837712756890, guid: 24737eef34e31c742a64bf534e58e827, type: 3}
+      propertyPath: m_LODs.Array.data[2].renderers.Array.data[0].renderer
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4742473837712756890, guid: 24737eef34e31c742a64bf534e58e827, type: 3}
+      propertyPath: m_LODs.Array.data[3].renderers.Array.data[0].renderer
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 8756696073200954376, guid: 24737eef34e31c742a64bf534e58e827, type: 3}
+    - {fileID: -7971205552540403806, guid: 24737eef34e31c742a64bf534e58e827, type: 3}
+    - {fileID: -7413440266184826985, guid: 24737eef34e31c742a64bf534e58e827, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 24737eef34e31c742a64bf534e58e827, type: 3}

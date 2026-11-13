@@ -52,6 +52,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: TwoStoryMedievalHouse
       objectReference: {fileID: 0}
+    - target: {fileID: 4742473837712756890, guid: f85caa4fafe8188409f814892a123f2c, type: 3}
+      propertyPath: m_LODs.Array.data[0].screenRelativeHeight
+      value: 0.4976981
+      objectReference: {fileID: 0}
+    - target: {fileID: 4742473837712756890, guid: f85caa4fafe8188409f814892a123f2c, type: 3}
+      propertyPath: m_LODs.Array.data[1].screenRelativeHeight
+      value: 0.28271183
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
