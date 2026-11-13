@@ -443,9 +443,9 @@ MonoBehaviour:
   groundSprintAcc: 30
   groundDeceleration: 10
   maxGroundWalkSpeed: 10
-  maxGroundSprintSpeed: 15
+  maxGroundSprintSpeed: 18
   groundFriction: 25
-  jumpForce: 8
+  jumpForce: 9
   maxAirSpeed: 10
   airAcc: 3
   airControl: 5
