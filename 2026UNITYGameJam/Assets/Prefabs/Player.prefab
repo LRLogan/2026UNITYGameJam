@@ -120,7 +120,7 @@ MonoBehaviour:
   weaponCamAllignment: {fileID: 55447304114156478}
   weaponMuzzle: {fileID: 7402191931390800916}
   weaponSpinDuration: 0.35
-  luckyChamberWeight: 1.25
+  luckyChamberWeight: 1.5
   jackpotHeal: 25
   jackpotEffects:
     enemyLayer:
@@ -459,7 +459,7 @@ MonoBehaviour:
   wallAdhesionForce: 10
   wallRunGravityScale: 0.03
   wallCheckDist: 1
-  minJumpHeight: 1.5
+  minJumpHeight: 1
   exitWallTime: 0.25
   wallContactGraceTime: 0.08
   wallJumpUpForce: 5

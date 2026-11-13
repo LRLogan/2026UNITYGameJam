@@ -52,8 +52,27 @@ PrefabInstance:
       propertyPath: m_Name
       value: MossyBoulder
       objectReference: {fileID: 0}
+    - target: {fileID: 4742473837712756890, guid: 1c36a92a937730f45a23f4a5990acdcc, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4742473837712756890, guid: 1c36a92a937730f45a23f4a5990acdcc, type: 3}
+      propertyPath: m_LODs.Array.data[1].renderers.Array.data[0].renderer
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4742473837712756890, guid: 1c36a92a937730f45a23f4a5990acdcc, type: 3}
+      propertyPath: m_LODs.Array.data[2].renderers.Array.data[0].renderer
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4742473837712756890, guid: 1c36a92a937730f45a23f4a5990acdcc, type: 3}
+      propertyPath: m_LODs.Array.data[3].renderers.Array.data[0].renderer
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 8651840539154221155, guid: 1c36a92a937730f45a23f4a5990acdcc, type: 3}
+    - {fileID: -734119355338407328, guid: 1c36a92a937730f45a23f4a5990acdcc, type: 3}
+    - {fileID: 2794079163324104702, guid: 1c36a92a937730f45a23f4a5990acdcc, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1c36a92a937730f45a23f4a5990acdcc, type: 3}
