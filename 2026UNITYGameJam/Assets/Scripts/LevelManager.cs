@@ -44,6 +44,7 @@ public class LevelManager : MonoBehaviour
         }
 
         initialPlayerPosition = player.transform.position;
+        if (GetComponent<PauseMenuUI>() == null) gameObject.AddComponent<PauseMenuUI>();
         var interaction = player.GetComponent<PlayerInteract>();
         if (interaction != null) interaction.Bind(this);
 
