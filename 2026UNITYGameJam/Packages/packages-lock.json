@@ -1,5 +1,14 @@
 {
   "dependencies": {
+    "com.abstractocclusion.webgpuwater": {
+      "version": "file:com.abstractocclusion.webgpuwater",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.render-pipelines.universal": "17.0.0",
+        "com.unity.inputsystem": "1.18.0"
+      }
+    },
     "com.coplaydev.unity-mcp": {
       "version": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
       "depth": 0,

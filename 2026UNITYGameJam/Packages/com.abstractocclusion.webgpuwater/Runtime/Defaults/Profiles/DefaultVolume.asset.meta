@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f13cb74cdd07bbf48bce9647a04e9ac2
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 390962
+  packageName: WebGpu interactive water
+  packageVersion: 1.0
+  assetPath: Packages/com.abstractocclusion.webgpuwater/Runtime/Defaults/Profiles/DefaultVolume.asset
+  uploadId: 977994
