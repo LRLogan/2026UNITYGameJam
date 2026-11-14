@@ -114,7 +114,7 @@ MonoBehaviour:
   health: 75
   characterAnimator: {fileID: 2709549729551883689}
   healthSlider: {fileID: 0}
-  healthSliderContainer: {fileID: 0}
+  healthSliderContainer: {fileID: 2173226697511899892}
 --- !u!135 &2642371158026440822
 SphereCollider:
   m_ObjectHideFlags: 0

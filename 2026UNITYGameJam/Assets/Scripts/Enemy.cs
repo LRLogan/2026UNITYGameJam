@@ -101,16 +101,23 @@ public class Enemy : MonoBehaviour
 
     private void CreateHealthBar()
     {
+        // Preserve the prefab's authored anchor before assigning the generated billboard.
+        Transform anchor = healthSliderContainer != null ? healthSliderContainer : transform.Find("Enemy hp");
         var bar = new GameObject("Enemy Health", typeof(RectTransform), typeof(Canvas),
             typeof(UnityEngine.UI.Image), typeof(Slider));
         RectTransform barRect = (RectTransform)bar.transform;
-        barRect.SetParent(transform, false);
+        barRect.SetParent(anchor != null ? anchor : transform, false);
         barRect.sizeDelta = new Vector2(100f, 10f);
         barRect.localScale = Vector3.one * 0.012f;
 
-        Collider body = GetComponent<Collider>();
-        float top = body != null && body != detectionSphere ? body.bounds.max.y : transform.position.y + 1f;
-        barRect.position = new Vector3(transform.position.x, top + 0.25f, transform.position.z);
+        if (anchor == null)
+        {
+            float top = transform.position.y + 1f;
+            foreach (Collider body in GetComponents<Collider>())
+                if (body.enabled && !body.isTrigger && body != detectionSphere)
+                    top = Mathf.Max(top, body.bounds.max.y);
+            barRect.position = new Vector3(transform.position.x, top + 0.25f, transform.position.z);
+        }
         bar.GetComponent<Canvas>().renderMode = RenderMode.WorldSpace;
 
         var background = bar.GetComponent<UnityEngine.UI.Image>();
