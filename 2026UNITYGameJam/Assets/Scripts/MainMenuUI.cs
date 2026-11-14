@@ -37,10 +37,11 @@ public sealed class MainMenuUI : MonoBehaviour
         Text(home.transform, "A LITTLE LUCK. A PERFECT SHOT.", 15, Gold, 55, -66, 390, 30);
         Text(home.transform, "JACKPOT\nSHOT", 70, Ivory, 52, -115, 400, 180, FontStyles.Bold);
         Text(home.transform, "Find the swords. Make every shot count.", 18, Ivory, 55, -297, 390, 38);
-        playButton = Button(home.transform, "PLAY", 55, -374, Play, true);
-        Button(home.transform, "CONTROLS", 55, -449, ShowControls);
-        Button(home.transform, "EXIT", 55, -524, Exit);
-        status = Text(home.transform, "", 16, Ivory, 55, -610, 390, 60);
+        playButton = Button(home.transform, "PLAY", 55, -345, Play, true);
+        Button(home.transform, "CONTROLS", 55, -415, ShowControls);
+        Button(home.transform, "CREDITS", 55, -485, ShowCredits);
+        Button(home.transform, "EXIT", 55, -555, Exit);
+        status = Text(home.transform, "", 16, Ivory, 55, -625, 390, 60);
         EventSystem.current.SetSelectedGameObject(playButton.gameObject);
     }
 
@@ -68,6 +69,20 @@ public sealed class MainMenuUI : MonoBehaviour
         OpenDialog("CONTROLS", "MOVE                         W A S D / Arrow keys\nLOOK                         Mouse\nSPRINT                       Left Shift\nJUMP / WALL JUMP             Space\nWALL CLIMB / DESCEND         Z / X\nSHOOT                        Left mouse button\nRELOAD                       R\nSPIN REVOLVER                T\nCOLLECT SWORD                E\n\nCollect each marked sword, then return to the green\nextraction beacon. Use your lucky shot wisely.");
     }
 
+    private void ShowCredits()
+    {
+        OpenDialog("CREDITS", "Made by: Logan Larrondo\n\n" +
+            "Assets used from the Unity Asset Store:\n" +
+            "Human Soldier Animations FREE by Kevin Iglesias\n" +
+            "Weapons FREE - Low Poly 3D Models Pack by ithappy\n" +
+            "Zap VFX - URP by Vefects\n" +
+            "Sprite muzzle flashes by bestgamekits\n" +
+            "Low Poly Medieval Starter Pack by Plug & Play\n" +
+            "DOTween (HOTween v2) by Demigiant\n" +
+            "Low Poly Tree Pack by BROKEN VECTOR\n\n" +
+            "Thanks for playing!", backText: "BACK");
+    }
+
     private void Exit()
     {
 #if UNITY_EDITOR
@@ -84,7 +99,7 @@ public sealed class MainMenuUI : MonoBehaviour
 #endif
     }
 
-    private void OpenDialog(string title, string body, bool showBack = true)
+    private void OpenDialog(string title, string body, bool showBack = true, string backText = "BACK TO MENU")
     {
         home.SetActive(false);
         dialog = Rect("Menu Dialog", home.transform.parent, Vector2.zero, Vector2.one).gameObject;
@@ -96,7 +111,7 @@ public sealed class MainMenuUI : MonoBehaviour
         Text(panel, body, 22, Ivory, 35, -115, 690, 365);
         if (showBack)
         {
-            var back = Button(panel, "BACK TO MENU", 35, -520, CloseDialog, true);
+            var back = Button(panel, backText, 35, -520, CloseDialog, true);
             EventSystem.current.SetSelectedGameObject(back.gameObject);
         }
         else EventSystem.current.SetSelectedGameObject(null);
