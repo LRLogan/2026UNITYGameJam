@@ -13,6 +13,12 @@ public class LevelManager : MonoBehaviour
     [SerializeField, Min(0.1f)] private float extractionRadius = 3f;
     [SerializeField] private string interactPrompt = "Press Interact to pick up";
     [SerializeField] private string mainMenuScene = "MainMenu";
+    [Header("Objective visuals")]
+    [SerializeField] private GameObject objectiveSwordPrefab;
+    [SerializeField] private Material beaconMaterial;
+    [SerializeField, Min(10f)] private float beaconHeight = 150f;
+    [SerializeField, Min(0.1f)] private float beaconWidth = 3f;
+    [SerializeField, Min(0.1f)] private float swordHeight = 1.5f;
 
     private PlayerCore player;
     private readonly Queue<Transform> remainingObjectives = new Queue<Transform>();
@@ -85,7 +91,7 @@ public class LevelManager : MonoBehaviour
     private void SpawnNextObjective()
     {
         Transform point = remainingObjectives.Dequeue();
-        GameObject pickup = CreateMarker("Objective", point.position, new Color32(255, 185, 54, 255));
+        GameObject pickup = CreateMarker("Objective", point.position, new Color32(255, 185, 54, 255), true);
         activeObjective = pickup.AddComponent<PlayerObjective>();
 
         var prompt = new GameObject("Interact Prompt", typeof(RectTransform)).AddComponent<TextMeshPro>();
@@ -184,13 +190,60 @@ public class LevelManager : MonoBehaviour
         hud.SetInstructions(string.Empty);
     }
 
-    private GameObject CreateMarker(string name, Vector3 position, Color color)
+    private GameObject CreateMarker(string name, Vector3 position, Color color, bool isPickup = false)
     {
         var marker = new GameObject(name);
         marker.transform.SetParent(transform, false);
         marker.transform.position = position;
-        CreateMarkerPart(marker.transform, "Cube", new Vector3(0f, 0.45f, 0f), Vector3.one * 0.8f, color);
-        CreateMarkerPart(marker.transform, "Beacon", new Vector3(0f, 3f, 0f), new Vector3(0.12f, 6f, 0.12f), color);
+        if (isPickup && objectiveSwordPrefab != null)
+        {
+            GameObject sword = Instantiate(objectiveSwordPrefab, marker.transform);
+            sword.name = "Objective Sword";
+            sword.transform.localPosition = Vector3.zero;
+            sword.transform.localRotation = Quaternion.identity;
+            // Normalize the asset's longest dimension into an upright, readable pickup.
+            Renderer[] renderers = sword.GetComponentsInChildren<Renderer>();
+            if (renderers.Length > 0)
+            {
+                Bounds bounds = renderers[0].bounds;
+                foreach (Renderer renderer in renderers) bounds.Encapsulate(renderer.bounds);
+                Vector3 size = bounds.size;
+                if (size.x > size.y && size.x > size.z) sword.transform.rotation = Quaternion.Euler(0, 0, 90);
+                else if (size.z > size.y) sword.transform.rotation = Quaternion.Euler(-90, 0, 0);
+                bounds = renderers[0].bounds;
+                foreach (Renderer renderer in renderers) bounds.Encapsulate(renderer.bounds);
+                sword.transform.localScale *= swordHeight / Mathf.Max(0.001f, bounds.size.y);
+                bounds = renderers[0].bounds;
+                foreach (Renderer renderer in renderers) bounds.Encapsulate(renderer.bounds);
+                sword.transform.position += new Vector3(position.x - bounds.center.x,
+                    position.y + 0.15f - bounds.min.y, position.z - bounds.center.z);
+            }
+            foreach (Collider collider in sword.GetComponentsInChildren<Collider>()) collider.enabled = false;
+            foreach (Rigidbody body in sword.GetComponentsInChildren<Rigidbody>()) body.isKinematic = true;
+        }
+        else CreateMarkerPart(marker.transform, "Marker Base", new Vector3(0f, 0.15f, 0f), new Vector3(1.2f, 0.15f, 1.2f), color);
+
+        if (beaconMaterial != null)
+        {
+            var beamObject = new GameObject("Beacon");
+            beamObject.transform.SetParent(marker.transform, false);
+            var beam = beamObject.AddComponent<LineRenderer>();
+            beam.sharedMaterial = beaconMaterial;
+            beam.useWorldSpace = true;
+            beam.alignment = LineAlignment.View;
+            beam.textureMode = LineTextureMode.Stretch;
+            beam.positionCount = 2;
+            beam.SetPosition(0, position + Vector3.up * 0.1f);
+            beam.SetPosition(1, position + Vector3.up * beaconHeight);
+            beam.startWidth = beaconWidth;
+            beam.endWidth = beaconWidth * 0.6f;
+            beam.startColor = color;
+            beam.endColor = color;
+            beam.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            beam.receiveShadows = false;
+        }
+        else CreateMarkerPart(marker.transform, "Beacon", Vector3.up * beaconHeight * 0.5f,
+            new Vector3(0.2f, beaconHeight, 0.2f), color);
         return marker;
     }
 
