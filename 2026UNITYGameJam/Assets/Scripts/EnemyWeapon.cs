@@ -6,6 +6,7 @@ using UnityEngine;
 public class EnemyWeapon : MonoBehaviour
 {
     [SerializeField] private Transform bulletOrigin;
+    [SerializeField] private MuzzleFlash muzzleFlash;
     [SerializeField, Min(0)] private int damage = 10;
     [SerializeField, Min(0.01f)] private float shotCooldown = 1f;
     [SerializeField, Min(0f)] private float shotRange = 30f;
@@ -17,6 +18,11 @@ public class EnemyWeapon : MonoBehaviour
     private void Awake()
     {
         owner = GetComponentInParent<Enemy>();
+        if (muzzleFlash == null) muzzleFlash = GetComponentInChildren<MuzzleFlash>(true);
+        // Existing prefabs use EnemyWeapon/Muzzle/MuzzleFlash.
+        if (bulletOrigin == null) bulletOrigin = transform.Find("Muzzle");
+        if (bulletOrigin == null && muzzleFlash != null) bulletOrigin = muzzleFlash.transform;
+        if (muzzleFlash != null) muzzleFlash.SetCameraFacing(true);
     }
 
     public bool TryShoot(PlayerCore target, Vector3 aimPoint)
@@ -30,6 +36,7 @@ public class EnemyWeapon : MonoBehaviour
         if (direction.sqrMagnitude < 0.001f || direction.sqrMagnitude > shotRange * shotRange) return false;
 
         nextShotTime = Time.time + Mathf.Max(0.01f, shotCooldown);
+        if (muzzleFlash != null && muzzleFlash.isActiveAndEnabled) muzzleFlash.Play();
         RaycastHit[] hits = Physics.RaycastAll(origin, direction.normalized, shotRange,
             detectionLayers, QueryTriggerInteraction.Ignore);
 

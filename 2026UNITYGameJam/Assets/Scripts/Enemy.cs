@@ -13,6 +13,11 @@ public class Enemy : MonoBehaviour
     private Collider playerCollider;
     private PlayerCore player;
 
+    [Header("Animation")]
+    [SerializeField] private Animator characterAnimator;
+    private static readonly int ShootTrigger = Animator.StringToHash("Shoot");
+    private bool hasShootTrigger;
+
     [Header("Health bar")]
     [SerializeField] private Slider healthSlider;
     [SerializeField] private Transform healthSliderContainer;
@@ -23,6 +28,14 @@ public class Enemy : MonoBehaviour
     private void Awake()
     {
         health = maxHealth;
+        if (characterAnimator == null) characterAnimator = GetComponentInChildren<Animator>();
+        if (characterAnimator != null && characterAnimator.runtimeAnimatorController != null)
+        {
+            characterAnimator.applyRootMotion = false;
+            foreach (AnimatorControllerParameter parameter in characterAnimator.parameters)
+                if (parameter.nameHash == ShootTrigger && parameter.type == AnimatorControllerParameterType.Trigger)
+                    hasShootTrigger = true;
+        }
         if (detectionSphere != null)
         {
             detectionSphere.isTrigger = true;
@@ -63,7 +76,12 @@ public class Enemy : MonoBehaviour
         if (direction.sqrMagnitude > 0.001f)
             transform.rotation = Quaternion.LookRotation(direction, Vector3.up);
 
-        if (weapon != null) weapon.TryShoot(player, aimPoint);
+        if (weapon != null && weapon.TryShoot(player, aimPoint)
+            && hasShootTrigger && characterAnimator != null && characterAnimator.isActiveAndEnabled)
+        {
+            characterAnimator.ResetTrigger(ShootTrigger);
+            characterAnimator.SetTrigger(ShootTrigger);
+        }
     }
 
     private void OnDrawGizmos()

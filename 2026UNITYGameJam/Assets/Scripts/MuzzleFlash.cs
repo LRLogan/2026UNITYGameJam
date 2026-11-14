@@ -9,6 +9,10 @@ public class MuzzleFlash : MonoBehaviour
     [SerializeField] private Sprite[] frames;
     [SerializeField] private float framesPerSecond = 24f;
 
+    [Header("Visibility")]
+    [SerializeField] private bool faceCamera;
+    [SerializeField] private Camera viewingCamera;
+
     private SpriteRenderer spriteRenderer;
     private Coroutine animationRoutine;
 
@@ -20,14 +24,41 @@ public class MuzzleFlash : MonoBehaviour
 
     public void Play()
     {
-        if (frames == null || frames.Length == 0)
+        if (!isActiveAndEnabled || frames == null || frames.Length == 0)
             return;
+
+        if (spriteRenderer == null) spriteRenderer = GetComponent<SpriteRenderer>();
+        FaceViewingCamera();
 
         // Restart if another shot occurs during the animation.
         if (animationRoutine != null)
             StopCoroutine(animationRoutine);
 
         animationRoutine = StartCoroutine(AnimateFlash());
+    }
+
+    public void SetCameraFacing(bool value)
+    {
+        faceCamera = value;
+    }
+
+    private void LateUpdate()
+    {
+        // Run after the weapon's animated hand has moved. Keep the muzzle position intact.
+        if (spriteRenderer != null && spriteRenderer.enabled) FaceViewingCamera();
+    }
+
+    private void FaceViewingCamera()
+    {
+        if (!faceCamera) return;
+        if (viewingCamera == null || !viewingCamera.isActiveAndEnabled) viewingCamera = Camera.main;
+        if (viewingCamera == null) return;
+
+        Vector3 forward = viewingCamera.orthographic ? viewingCamera.transform.forward
+            : transform.position - viewingCamera.transform.position;
+        if (forward.sqrMagnitude < 0.000001f) return;
+        // Sprite front faces local -Z; point it toward the camera, including its elevation.
+        transform.rotation = Quaternion.LookRotation(forward, viewingCamera.transform.up);
     }
 
     private IEnumerator AnimateFlash()
