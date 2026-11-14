@@ -26,6 +26,9 @@ public sealed class PauseMenuUI : MonoBehaviour
     private Coroutine capture;
     private GameManager game;
     private PlayerInput playerInput;
+    private int selectedLuckyNumber;
+    private readonly UnityEngine.UI.Button[] luckyButtons = new UnityEngine.UI.Button[6];
+    private TextMeshProUGUI luckyStatus;
 
     private void Start()
     {
@@ -132,8 +135,18 @@ public sealed class PauseMenuUI : MonoBehaviour
         {
             Label(choices.transform, "YOUR MISSION", 18, 42, 30, true);
             Label(choices.transform, "JACKPOT SHOT", 48, 92, 75);
-            Label(choices.transform, "Welcome to Jackpot Shot! Your fast and with some luck your revolver can pack a serious punch, so get in there have some fun, grab the swords of coolness, and get out of there!", 29, 195, 245);
-            resumeButton = Button(choices.transform, "CONTINUE TO LEVEL", 455, () => SetPaused(false));
+            Label(choices.transform, "Welcome to Jackpot Shot! Your fast and with some luck your revolver can pack a serious punch, so get in there have some fun, grab the swords of coolness, and get out of there!", 25, 175, 165);
+            luckyStatus = Text(choices.transform, "CHOOSE YOUR LUCKY NUMBER", 19, Gold, 70, -340, 740, 35);
+            for (int i = 0; i < luckyButtons.Length; i++)
+            {
+                int number = i + 1;
+                var button = Button(choices.transform, number.ToString(), 380, () => SelectLuckyNumber(number));
+                Position((RectTransform)button.transform, 70 + i * 124, -380, 110, 56);
+                button.GetComponentInChildren<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+                luckyButtons[i] = button;
+            }
+            resumeButton = Button(choices.transform, "CONTINUE TO LEVEL", 455, BeginChosenRound);
+            resumeButton.interactable = false;
             Button(choices.transform, "VIEW CONTROLS", 535, () => ShowControls(true));
         }
         else
@@ -150,7 +163,34 @@ public sealed class PauseMenuUI : MonoBehaviour
         Label(controls.transform, UIHelpers.ControlsText, 23, 155, 350);
         Button(controls.transform, "BACK", 550, () => ShowControls(false));
         controls.SetActive(false);
-        EventSystem.current.SetSelectedGameObject(resumeButton.gameObject);
+        EventSystem.current.SetSelectedGameObject(showingWelcome ? luckyButtons[0].gameObject : resumeButton.gameObject);
+    }
+
+    private void SelectLuckyNumber(int number)
+    {
+        selectedLuckyNumber = number;
+        luckyStatus.text = $"YOUR LUCKY SHOT NUMBER: {number}";
+        for (int i = 0; i < luckyButtons.Length; i++)
+        {
+            var colors = luckyButtons[i].colors;
+            colors.normalColor = i + 1 == number ? Gold : new Color(0.12f, 0.18f, 0.18f, 0.95f);
+            luckyButtons[i].colors = colors;
+            luckyButtons[i].GetComponentInChildren<TextMeshProUGUI>().color = i + 1 == number
+                ? new Color(0.08f, 0.12f, 0.12f) : Ivory;
+        }
+        resumeButton.interactable = true;
+    }
+
+    private void BeginChosenRound()
+    {
+        if (selectedLuckyNumber < 1 || selectedLuckyNumber > 6 || game == null) return;
+        game.StartRound(selectedLuckyNumber);
+        if (!game.IsRoundActive)
+        {
+            luckyStatus.text = "Unable to start: check the GameManager's Revolver reference.";
+            return;
+        }
+        SetPaused(false);
     }
 
     private void ShowControls(bool show)
@@ -158,7 +198,8 @@ public sealed class PauseMenuUI : MonoBehaviour
         choices.SetActive(!show);
         controls.SetActive(show);
         EventSystem.current.SetSelectedGameObject(show
-            ? controls.GetComponentInChildren<UnityEngine.UI.Button>().gameObject : resumeButton.gameObject);
+            ? controls.GetComponentInChildren<UnityEngine.UI.Button>().gameObject
+            : showingWelcome && selectedLuckyNumber == 0 ? luckyButtons[0].gameObject : resumeButton.gameObject);
     }
 
     private void Quit()
@@ -177,6 +218,11 @@ public sealed class PauseMenuUI : MonoBehaviour
 #else
         Application.Quit();
 #endif
+    }
+
+    internal void DismissForResults()
+    {
+        if (paused) SetPaused(false);
     }
 
     private void OnDisable()

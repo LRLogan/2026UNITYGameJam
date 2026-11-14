@@ -30,6 +30,8 @@ public sealed class JackpotEffects
     [SerializeField, Min(0)] private int lightningSelfDamage = 20;
     [SerializeField, Min(0)] private int lightningMaxHops = 3;
 
+    public float ExplosionRadius => explosionRadius;
+
     /// <summary>
     /// Randomizer to choose and delegate the correct effect logic
     /// </summary>

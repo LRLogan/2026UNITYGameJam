@@ -25,11 +25,6 @@ public class GameManager : MonoBehaviour
     public event Action RoundEnded;
     public event Action ScoreChanged;
 
-    void Start()
-    {
-        StartRound(4);
-    }
-
     public void StartRound(int luckyNumber)
     {
         // Ensure the player is all set up
@@ -51,9 +46,9 @@ public class GameManager : MonoBehaviour
         FinishRound(null);
     }
 
-    internal void CompleteRound(double elapsedSeconds, PlayerCore player)
+    internal void CompleteRound(double elapsedSeconds, PlayerCore player, bool extracted = true)
     {
-        FinishRound(new RoundResult(PendingJackpotPoints, elapsedSeconds, player.Health, player.MaxHealth));
+        FinishRound(new RoundResult(PendingJackpotPoints, elapsedSeconds, player.Health, player.MaxHealth, extracted));
     }
 
     private void FinishRound(RoundResult? result)
@@ -89,12 +84,14 @@ public readonly struct RoundResult
     public readonly double ElapsedSeconds;
     public readonly int Health;
     public readonly int MaxHealth;
+    public readonly bool Extracted;
 
-    public RoundResult(int score, double elapsedSeconds, int health, int maxHealth)
+    public RoundResult(int score, double elapsedSeconds, int health, int maxHealth, bool extracted = true)
     {
         Score = score;
         ElapsedSeconds = elapsedSeconds;
         Health = health;
         MaxHealth = maxHealth;
+        Extracted = extracted;
     }
 }

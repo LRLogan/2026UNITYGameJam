@@ -29,6 +29,11 @@ public class Revolver : MonoBehaviour
     [SerializeField, Range(1f, 2f)] private float luckyChamberWeight = 1.25f;
     [SerializeField, Min(0)] private int jackpotHeal = 25;
     [SerializeField] private JackpotEffects jackpotEffects = new JackpotEffects();
+    [SerializeField] private GameObject lightningImpactPrefab;
+
+    public GameObject LightningImpactPrefab => lightningImpactPrefab;
+    public float ExplosionRadius => jackpotEffects.ExplosionRadius;
+    public Vector3 MuzzlePosition => weaponMuzzle != null ? weaponMuzzle.position : transform.position;
 
     private readonly RevolverCylinder cylinder = new RevolverCylinder(new System.Random());
     private GameManager gameManager;
@@ -49,7 +54,7 @@ public class Revolver : MonoBehaviour
     // The first point is the impact. Any remaining points are the lightning hops in order.
     public event Action<JackpotEffect, IReadOnlyList<Vector3>> JackpotEffectResolved;
 
-    private bool CanUseWeapon => isActiveAndEnabled && gameManager != null && gameManager.IsRoundActive;
+    private bool CanUseWeapon => isActiveAndEnabled && gameManager != null && gameManager.IsRoundActive && Time.timeScale > 0f;
 
     private void Awake()
     {
@@ -59,6 +64,7 @@ public class Revolver : MonoBehaviour
         weaponRestRotation = weaponCenter.localRotation;
         alignmentRestRotation = weaponCamAllignment.localRotation;
         if (weaponMuzzle != null) muzzleFlash = weaponMuzzle.GetComponentInChildren<MuzzleFlash>();
+        if (GetComponent<JackpotShotVisuals>() == null) gameObject.AddComponent<JackpotShotVisuals>();
     }
 
     private void LateUpdate()

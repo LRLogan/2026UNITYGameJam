@@ -120,19 +120,20 @@ MonoBehaviour:
   weaponCamAllignment: {fileID: 55447304114156478}
   weaponMuzzle: {fileID: 7402191931390800916}
   weaponSpinDuration: 0.35
-  luckyChamberWeight: 1.5
+  luckyChamberWeight: 2
   jackpotHeal: 25
   jackpotEffects:
     enemyLayer:
       serializedVersion: 2
-      m_Bits: 4294967291
-    explosionRadius: 4
-    explosionDamage: 50
+      m_Bits: 1011
+    explosionRadius: 5
+    explosionDamage: 100
     explosionSelfDamage: 30
     lightningRadius: 5
-    lightningDamage: 35
+    lightningDamage: 100
     lightningSelfDamage: 20
     lightningMaxHops: 3
+  lightningImpactPrefab: {fileID: 5627696518775099638, guid: 390cc74915d4a054bbd897e1885047a4, type: 3}
 --- !u!1 &4929833567302546802
 GameObject:
   m_ObjectHideFlags: 0

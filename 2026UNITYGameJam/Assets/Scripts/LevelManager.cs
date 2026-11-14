@@ -49,6 +49,7 @@ public class LevelManager : MonoBehaviour
         if (interaction != null) interaction.Bind(this);
 
         hud = new LevelHud(transform);
+        player.HealthChanged += CheckPlayerDeath;
         gameManager.RoundStarted += BeginLevel;
         gameManager.RoundEnded += ClearLevel;
         if (gameManager.IsRoundActive) BeginLevel();
@@ -56,6 +57,7 @@ public class LevelManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (player != null) player.HealthChanged -= CheckPlayerDeath;
         if (gameManager != null)
         {
             gameManager.RoundStarted -= BeginLevel;
@@ -139,8 +141,21 @@ public class LevelManager : MonoBehaviour
         if (extractionZone == null || candidate == null || candidate != player || !gameManager.IsRoundActive)
             return;
 
-        gameManager.CompleteRound(Time.timeAsDouble - roundStartTime, player);
+        FinishLevel(player.Health > 0);
+    }
+
+    private void CheckPlayerDeath()
+    {
+        if (player != null && player.Health <= 0) FinishLevel(false);
+    }
+
+    private void FinishLevel(bool extracted)
+    {
+        if (showingResults || loadingScene || gameManager == null || !gameManager.IsRoundActive) return;
+        // Restore any menu-owned pause before taking ownership of the results pause.
+        GetComponent<PauseMenuUI>()?.DismissForResults();
         showingResults = true;
+        gameManager.CompleteRound(Time.timeAsDouble - roundStartTime, player, extracted);
         previousTimeScale = Time.timeScale;
         Time.timeScale = 0f;
         PlayerInput input = player.GetComponent<PlayerInput>();

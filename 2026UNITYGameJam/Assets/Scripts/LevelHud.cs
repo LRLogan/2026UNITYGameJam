@@ -45,7 +45,8 @@ internal sealed class LevelHud
         TextMeshProUGUI stats = CreateLabel(panel, "Results", center, new Vector2(0f, 52f),
             new Vector2(470f, 200f), 32f);
         TimeSpan time = TimeSpan.FromSeconds(result.ElapsedSeconds);
-        stats.text = $"LEVEL COMPLETE\nScore: {result.Score}\nTime: {(int)time.TotalMinutes:00}:{time.Seconds:00}\nHealth: {result.Health} / {result.MaxHealth}";
+        string heading = result.Extracted ? "LEVEL COMPLETE" : "YOU DIED";
+        stats.text = $"{heading}\nScore: {result.Score}\nTime: {(int)time.TotalMinutes:00}:{time.Seconds:00}\nHealth: {result.Health} / {result.MaxHealth}";
 
         UnityEngine.UI.Button replayButton = CreateButton(panel, "Replay Level", -118f, replay);
         CreateButton(panel, "Main Menu", 118f, returnToMenu);
