@@ -19,25 +19,29 @@ Shader "GameJam/Objective Beacon"
                 float _Intensity;
             CBUFFER_END
             struct Attributes { float4 positionOS : POSITION; float2 uv : TEXCOORD0; half4 color : COLOR; };
-            struct Varyings { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; half4 color : COLOR; };
+            struct Varyings { float4 positionCS : SV_POSITION; half across : TEXCOORD0; half4 color : COLOR; };
             Varyings Vert(Attributes v)
             {
                 Varyings o;
                 o.positionCS = TransformObjectToHClip(v.positionOS.xyz);
-                o.uv = v.uv;
+                o.across = v.uv.y;
                 o.color = v.color;
+                // A segmented line interpolates these slowly varying values cheaply.
+                half topFade = 1.0h - smoothstep(0.75, 1.0, v.uv.x);
+                half pulse = 0.92h + 0.08h * sin(_Time.y * 2.0 - v.uv.x * 8.0);
+                o.color.a *= topFade * pulse;
                 return o;
             }
             half4 Frag(Varyings i) : SV_Target
             {
                 // LineRenderer UV.x runs along the beam; UV.y runs across it.
-                float center = saturate(1.0 - abs(i.uv.y * 2.0 - 1.0));
-                float core = pow(center, 12.0);
-                float glow = center * center * 0.35 + core * 0.65;
-                float topFade = 1.0 - smoothstep(0.75, 1.0, i.uv.x);
-                float pulse = 0.92 + 0.08 * sin(_Time.y * 2.0 - i.uv.x * 8.0);
+                half center = saturate(1.0h - abs(i.across * 2.0h - 1.0h));
+                half squared = center * center;
+                half fourth = squared * squared;
+                half core = fourth * fourth * fourth;
+                half glow = squared * 0.35h + core * 0.65h;
                 return half4(lerp(i.color.rgb, half3(1,1,1), core * 0.7) * _Intensity,
-                    glow * topFade * pulse * i.color.a);
+                    glow * i.color.a);
             }
             ENDHLSL
         }

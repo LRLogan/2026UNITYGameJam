@@ -245,6 +245,9 @@ public class LevelManager : MonoBehaviour
             sword.transform.localRotation = Quaternion.identity;
             // Normalize the asset's longest dimension into an upright, readable pickup.
             Renderer[] renderers = sword.GetComponentsInChildren<Renderer>();
+            // Small pickups retain their lit materials but need no extra shadow-map draw calls.
+            foreach (Renderer renderer in renderers)
+                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             if (renderers.Length > 0)
             {
                 Bounds bounds = renderers[0].bounds;
@@ -274,9 +277,11 @@ public class LevelManager : MonoBehaviour
             beam.useWorldSpace = true;
             beam.alignment = LineAlignment.View;
             beam.textureMode = LineTextureMode.Stretch;
-            beam.positionCount = 2;
-            beam.SetPosition(0, position + Vector3.up * 0.1f);
-            beam.SetPosition(1, position + Vector3.up * beaconHeight);
+            // Enough vertices for a smooth interpolated pulse/fade, avoiding per-pixel trig.
+            const int beamSegments = 16;
+            beam.positionCount = beamSegments + 1;
+            for (int i = 0; i <= beamSegments; i++)
+                beam.SetPosition(i, position + Vector3.up * Mathf.Lerp(0.1f, beaconHeight, i / (float)beamSegments));
             beam.startWidth = beaconWidth;
             beam.endWidth = beaconWidth * 0.6f;
             beam.startColor = color;
