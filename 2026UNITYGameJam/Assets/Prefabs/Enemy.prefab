@@ -111,7 +111,7 @@ MonoBehaviour:
   detectionRad: 15
   detectionSphere: {fileID: 2642371158026440822}
   maxHealth: 100
-  health: 0
+  health: 75
   characterAnimator: {fileID: 2709549729551883689}
   healthSlider: {fileID: 0}
   healthSliderContainer: {fileID: 0}
@@ -270,7 +270,7 @@ Transform:
   m_GameObject: {fileID: 3470625620469363167}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.698, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
