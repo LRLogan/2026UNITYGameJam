@@ -152,7 +152,32 @@ public class LevelManager : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        hud.ShowResult(gameManager.LastResult, () => LoadScene(gameObject.scene.path), () => LoadScene(mainMenuScene));
+        hud.ShowResult(gameManager.LastResult, ReplayLevel, () => LoadScene(mainMenuScene));
+    }
+
+    private void ReplayLevel()
+    {
+        if (loadingScene) return;
+        Scene currentLevel = gameObject.scene;
+        if (currentLevel.buildIndex >= 0 && Application.CanStreamedLevelBeLoaded(currentLevel.buildIndex))
+        {
+            loadingScene = true;
+            ResumeGameplay();
+            SceneManager.LoadScene(currentLevel.buildIndex, LoadSceneMode.Single);
+            return;
+        }
+#if UNITY_EDITOR
+        // Support testing a saved gameplay scene directly, even outside the build list.
+        if (!string.IsNullOrEmpty(currentLevel.path))
+        {
+            loadingScene = true;
+            ResumeGameplay();
+            UnityEditor.SceneManagement.EditorSceneManager.LoadSceneInPlayMode(currentLevel.path,
+                new LoadSceneParameters(LoadSceneMode.Single));
+            return;
+        }
+#endif
+        hud.SetLoadError("Save this level and include it in the Build Profile's scene list to replay.");
     }
 
     private void LoadScene(string scene)

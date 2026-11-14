@@ -36,11 +36,7 @@ internal sealed class LevelHud
     internal void ShowResult(RoundResult result, Action replay, Action returnToMenu)
     {
         instructions.gameObject.SetActive(false);
-        if (UnityEngine.Object.FindFirstObjectByType<EventSystem>() == null)
-        {
-            var input = new GameObject("Results Event System", typeof(EventSystem), typeof(InputSystemUIInputModule));
-            input.transform.SetParent(canvas, false);
-        }
+        EventSystem events = UIHelpers.EnsureEventSystem("Results Event System", canvas);
 
         Vector2 center = new Vector2(0.5f, 0.5f);
         RectTransform panel = CreateRect(canvas, "Level Results", center, Vector2.zero, new Vector2(520f, 340f));
@@ -51,10 +47,11 @@ internal sealed class LevelHud
         TimeSpan time = TimeSpan.FromSeconds(result.ElapsedSeconds);
         stats.text = $"LEVEL COMPLETE\nScore: {result.Score}\nTime: {(int)time.TotalMinutes:00}:{time.Seconds:00}\nHealth: {result.Health} / {result.MaxHealth}";
 
-        CreateButton(panel, "Replay Level", -118f, replay);
+        UnityEngine.UI.Button replayButton = CreateButton(panel, "Replay Level", -118f, replay);
         CreateButton(panel, "Main Menu", 118f, returnToMenu);
         loadError = CreateLabel(panel, "Load Status", center, new Vector2(0f, -125f),
             new Vector2(470f, 58f), 19f);
+        events.SetSelectedGameObject(replayButton.gameObject);
     }
 
     internal void SetLoadError(string message)
@@ -62,7 +59,7 @@ internal sealed class LevelHud
         if (loadError != null) loadError.text = message;
     }
 
-    private static void CreateButton(Transform parent, string text, float x, Action action)
+    private static UnityEngine.UI.Button CreateButton(Transform parent, string text, float x, Action action)
     {
         Vector2 center = new Vector2(0.5f, 0.5f);
         RectTransform rect = CreateRect(parent, text, center, new Vector2(x, -65f), new Vector2(214f, 48f));
@@ -76,6 +73,7 @@ internal sealed class LevelHud
         button.colors = colors;
         button.onClick.AddListener(() => action());
         CreateLabel(rect, "Label", center, Vector2.zero, rect.sizeDelta, 24f).text = text;
+        return button;
     }
 
     private static TextMeshProUGUI CreateLabel(Transform parent, string name, Vector2 anchor,

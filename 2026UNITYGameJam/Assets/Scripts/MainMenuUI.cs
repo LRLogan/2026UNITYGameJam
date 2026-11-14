@@ -1,3 +1,4 @@
+using static UIHelpers;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -16,8 +17,6 @@ public sealed class MainMenuUI : MonoBehaviour
     private TextMeshProUGUI status;
     private bool loading;
     private bool exiting;
-    private static readonly Color Ivory = new Color(0.96f, 0.94f, 0.86f);
-    private static readonly Color Gold = new Color(0.88f, 0.72f, 0.43f);
 
     private void Start()
     {
@@ -25,21 +24,8 @@ public sealed class MainMenuUI : MonoBehaviour
         AudioListener.pause = false;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
-        if (FindFirstObjectByType<EventSystem>() == null)
-        {
-            var events = new GameObject("Menu Event System", typeof(EventSystem), typeof(InputSystemUIInputModule));
-            events.transform.SetParent(transform);
-            events.GetComponent<InputSystemUIInputModule>().AssignDefaultActions();
-        }
-        var canvasObject = new GameObject("Menu Canvas", typeof(RectTransform), typeof(Canvas),
-            typeof(UnityEngine.UI.CanvasScaler), typeof(UnityEngine.UI.GraphicRaycaster));
-        canvasObject.transform.SetParent(transform, false);
-        canvasObject.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
-        var scaler = canvasObject.GetComponent<UnityEngine.UI.CanvasScaler>();
-        scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1340, 694);
-        scaler.screenMatchMode = UnityEngine.UI.CanvasScaler.ScreenMatchMode.Expand;
-        RectTransform root = (RectTransform)canvasObject.transform;
+        EnsureEventSystem("Menu Event System", transform);
+        RectTransform root = CreateOverlayCanvas("Menu Canvas", transform, new Vector2(1340, 694));
         var image = Rect("Scenery", root, Vector2.zero, Vector2.one).gameObject.AddComponent<UnityEngine.UI.RawImage>();
         image.texture = background;
         image.raycastTarget = false;
@@ -92,17 +78,10 @@ public sealed class MainMenuUI : MonoBehaviour
         Screen.fullScreen = false;
         exiting = true;
         OpenDialog("THANKS FOR PLAYING", "Your session has ended.\n\nYou can safely close this browser tab.\nRefresh the page to play again.", false);
-        StartCoroutine(QuitWebPlayer());
+        StartCoroutine(QuitAfterFrame());
 #else
         Application.Quit();
 #endif
-    }
-
-    private System.Collections.IEnumerator QuitWebPlayer()
-    {
-        // Present the final screen before stopping the Web player; browsers keep the tab open.
-        yield return new WaitForEndOfFrame();
-        Application.Quit();
     }
 
     private void OpenDialog(string title, string body, bool showBack = true)
@@ -133,54 +112,4 @@ public sealed class MainMenuUI : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(playButton.gameObject);
     }
 
-    private static RectTransform Rect(string name, Transform parent, Vector2 min, Vector2 max)
-    {
-        var rect = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
-        rect.SetParent(parent, false);
-        rect.anchorMin = min;
-        rect.anchorMax = max;
-        rect.offsetMin = rect.offsetMax = Vector2.zero;
-        return rect;
-    }
-
-    private static void Position(RectTransform rect, float x, float y, float width, float height)
-    {
-        rect.anchorMin = rect.anchorMax = new Vector2(0, 1);
-        rect.pivot = new Vector2(0, 1);
-        rect.anchoredPosition = new Vector2(x, y);
-        rect.sizeDelta = new Vector2(width, height);
-    }
-
-    private static TextMeshProUGUI Text(Transform parent, string value, int size, Color color,
-        float x, float y, float width, float height, FontStyles style = FontStyles.Normal)
-    {
-        var label = Rect("Label", parent, Vector2.zero, Vector2.one).gameObject.AddComponent<TextMeshProUGUI>();
-        Position(label.rectTransform, x, y, width, height);
-        label.text = value;
-        label.fontSize = size;
-        label.fontStyle = style;
-        label.color = color;
-        label.raycastTarget = false;
-        return label;
-    }
-
-    private static UnityEngine.UI.Button Button(Transform parent, string title, float x, float y,
-        UnityEngine.Events.UnityAction action, bool primary = false)
-    {
-        var rect = Rect(title, parent, Vector2.zero, Vector2.one);
-        Position(rect, x, y, 330, 58);
-        var image = rect.gameObject.AddComponent<UnityEngine.UI.Image>();
-        image.color = Color.white;
-        var button = rect.gameObject.AddComponent<UnityEngine.UI.Button>();
-        var colors = button.colors;
-        colors.normalColor = primary ? Gold : new Color(0.12f, 0.17f, 0.17f, 0.95f);
-        colors.highlightedColor = primary ? new Color(1, 0.86f, 0.58f) : new Color(0.27f, 0.34f, 0.32f);
-        colors.selectedColor = colors.highlightedColor;
-        colors.pressedColor = new Color(0.53f, 0.43f, 0.27f);
-        button.colors = colors;
-        button.targetGraphic = image;
-        button.onClick.AddListener(action);
-        Text(rect, title, 23, primary ? new Color(0.08f, 0.12f, 0.12f) : Ivory, 24, -13, 290, 38, FontStyles.Bold);
-        return button;
-    }
 }
