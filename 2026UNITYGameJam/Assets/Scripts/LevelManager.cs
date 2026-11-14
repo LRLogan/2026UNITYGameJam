@@ -120,6 +120,7 @@ public class LevelManager : MonoBehaviour
 
         RemoveMarker(activeObjective);
         activeObjective = null;
+        player.Heal(player.MaxHealth);
         if (remainingObjectives.Count > 0) SpawnNextObjective();
         else EnableExtraction();
     }
